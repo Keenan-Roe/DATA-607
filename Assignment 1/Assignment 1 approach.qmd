@@ -1,0 +1,18 @@
+---
+title: "Trends in Global Aviation"
+format: html
+editor: visual
+---
+
+```{r}
+#| echo: false
+
+financialDF <- read.csv("airline_financials.csv")
+
+```
+
+# Aviation Financial overview
+
+## Introduction
+
+For the purposes of this introductory assignment I have chosen to do some light analysis on airline financials. The [source](https://www.kaggle.com/datasets/sergionefedov/global-aviation-industry-2010-2026?resource=download) of the data is kaggle and the datasets go over financials, fleet, passenger traffic, route performance, and aviation incidents. I have chosen to focus on the specific financials to keep this initial project focused and because, fortunately, I am currently part of the aviation industry and have some insight on what to expect out of this data. This dataset will have all major airlines across the world and their financial benchmarks for each year. most importantly this will cover covid helping me create subsets and basic graphs of each airline with a huge changes after 2020 which should be interesting to analyse.
