@@ -1,0 +1,93 @@
+---
+title: "Aviation Financials codebase"
+format: html
+editor: visual
+---
+
+# Aviation Financials Introduction
+
+I have chosen the dataset [Global Aviation Industry 2010-2026](https://www.kaggle.com/datasets/sergionefedov/global-aviation-industry-2010-2026?resource=download). I will be focusing on the airline financials dataset within the group of datasets for simplicity. I will be doing basic renaming and small transformations for this first assignment. This dataset is specifically about the financial situation of major airlines over the last 17 years. It includes the year, revenue, and total profit margin for each airline.
+
+```{r}
+#| label: min-and-max-years
+#| message: false
+#| echo: false
+
+library(gt)
+library(ggplot2)
+library(dplyr)
+
+financialsDF <- read.csv("airline_financials.csv")
+
+colnames(financialsDF) <- c( "Year", "Airline", "Country_Code", "Country", "Region", "Model", "Revenue_in_Billions", "Total_Margin", "Income", "Passengers_in_Millions", "Passengers_Per_Flight", "Fleet_size")
+
+bestYearDF <- data.frame(matrix( NA, nrow = length(unique( financialsDF$Airline)), ncol = 3))
+
+colnames(bestYearDF) <- c("Airline", "Year", "Revenue")
+
+bestYearDF$Airline <- unique( financialsDF$Airline)
+
+for ( i in 1:length(bestYearDF$Airline)){
+  
+  tempDF <- subset( financialsDF, Airline == bestYearDF[i,1], select = c( Year,                         Revenue_in_Billions)) 
+  
+    bestYearDF[i,2:3]<- tempDF[which.max(tempDF$Revenue_in_Billions), ]
+    rm(tempDF)
+}
+
+
+
+worstYearDF <- data.frame(matrix( NA, nrow = length(unique( financialsDF$Airline)), ncol = 3))
+
+colnames(worstYearDF) <- c("Airline", "Year", "Revenue")
+
+worstYearDF$Airline <- unique( financialsDF$Airline )
+
+for ( i in 1:length(worstYearDF$Airline)){
+  
+  tempDF <- subset( financialsDF, Airline == bestYearDF[i,1], select = c( Year,                         Revenue_in_Billions)) 
+  
+  worstYearDF[i,2:3]<- tempDF[which.min(tempDF$Revenue_in_Billions), ]
+  rm(tempDF)
+}
+
+```
+
+## Highest and lowest financial years 
+
+Looking at the highest and lowest years shows a very expected trend. The highest years will almost always be the current year. However, the lowest yearly revenue for the majority of these airlines is 2020. Covid affected the entire world of aviation.
+
+@min-and-max-compare shows us each airlines best and worst years. Showing revenue in billions of US dollars.
+
+```{r}
+#| label: min-and-max-compare
+#| message: false
+#| echo: false
+#| layout-ncol: 2
+
+bestYearDF |> 
+  gt() |> 
+  tab_header( title = "Highest Yearly Revenue" )
+
+worstYearDF |> 
+  gt() |> 
+  tab_header( title = "Lowest Yearly Revenue" )
+
+
+```
+
+```{r}
+#| label: bar-graph
+#| message: false
+#| echo: false
+
+yearly_totals <- financialsDF |> 
+  group_by(Year) |> 
+  summarise( total = sum(Revenue_in_Billions))
+  
+ggplot(yearly_totals, aes( x = Year, y = total)) +
+  geom_col(fill = "lightblue") + 
+  labs(x = "Year", y = "Total Revenue", title = "Total Revenue by Year") +
+  theme_minimal()
+  
+```
