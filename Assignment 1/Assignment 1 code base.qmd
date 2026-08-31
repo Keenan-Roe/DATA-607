@@ -57,7 +57,7 @@ for ( i in 1:length(worstYearDF$Airline)){
 
 Looking at the highest and lowest years shows a very expected trend. The highest years will almost always be the current year. However, the lowest yearly revenue for the majority of these airlines is 2020. Covid affected the entire world of aviation.
 
-@min-and-max-compare shows us each airlines best and worst years. Showing revenue in billions of US dollars.
+The figures below shows us each airlines best and worst years. Showing revenue in billions of US dollars.
 
 ```{r}
 #| label: min-and-max-compare
