@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/1455367/7f98d9c9895e42bcbd08d1a95096e687
+bundleId: https://api.rpubs.com/api/v1/document/1455367/7f98d9c9895e42bcbd08d1a95096e687
+url: http://rpubs.com/Keenan-Roe/1455367
+version: 1

@@ -76,6 +76,10 @@ worstYearDF |>
 
 ```
 
+## Total Global Aviation Yearly Revenue 
+
+Figure 2 below is a graph showing the yearly revenue of all airlines throughout the world. When comparing year to year you will see a gradual increase until 2020 during the covid pandemic when the industry shrunk to nearly a third of it's size the previous year. The industry looks to have fully recovered as of 2025.
+
 ```{r}
 #| label: bar-graph
 #| message: false
@@ -91,3 +95,7 @@ ggplot(yearly_totals, aes( x = Year, y = total)) +
   theme_minimal()
   
 ```
+
+# Overview 
+
+These simple tables and bar graph show the impact that the covid-19 pandemic had on the aviation industry, but it does not yet tell a story of the recovery. While the current projections show a trend upwards there may be other factors that still need to be recovered that is not shown in the financials at this time. I would further this analysis with more a granular look at the different parts of the aviation industry and how they were affected. For instance, how much has been spent on repair and upkeep costs compared to delivery of fully knew aircrafts/engines and try to determine the sustainability of this growth through those data points.
