@@ -1,0 +1,9 @@
+---
+title: "SQL and R Approach"
+format: html
+editor: visual
+---
+
+## Approach 
+
+For this assignment I will create the database in SQL, but will simply load it as a csv file that will be uploaded to github for reproducibility. This is rather simple on the R side so I will produce the data using SQL and display it as a table in R.

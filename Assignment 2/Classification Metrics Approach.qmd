@@ -1,0 +1,35 @@
+---
+title: "Classification Metrics"
+format: html
+editor: visual
+---
+
+## Approach
+
+I have yet to work with a classification model before, but it seems like simple statistics. In addition, I have not yet encountered a confusion matrix. Below are examples created by gemini with a google search.
+
+```{r}
+#| title: sample-confusion-matrix
+
+# Sample data
+actual    <- factor(c("Yes", "No", "Yes", "Yes", "No", "Yes", "No", "No"))
+predicted <- factor(c("Yes", "No", "No",  "Yes", "No", "Yes", "Yes", "No"))
+
+# Generate simple cross-tabulation
+raw_matrix <- table(Predicted = predicted, Actual = actual)
+print(raw_matrix)
+
+
+library(caret)
+
+# Define your data as factors (ensure they have identical levels)
+actual    <- factor(c("Yes", "No", "Yes", "Yes", "No", "Yes", "No", "No"), levels = c("Yes", "No"))
+predicted <- factor(c("Yes", "No", "No",  "Yes", "No", "Yes", "Yes", "No"), levels = c("Yes", "No"))
+
+# Generate the confusion matrix
+# Note: Syntax is confusionMatrix(predictions, references/actuals)
+cm <- confusionMatrix(predicted, actual)
+print(cm)
+```
+
+The caret package might produce the easiest results, but I will have to start working with the data and reviewing the literature before making a decision.
