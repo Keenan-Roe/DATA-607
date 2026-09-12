@@ -1,0 +1,14 @@
+---
+title: "SQL and R"
+format: html
+editor: visual
+---
+
+## Load SQL data into R
+
+```{r}
+#| title: add-dataframe
+
+input1 <- read.csv("movie reviews.csv")
+
+```
