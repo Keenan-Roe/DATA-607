@@ -1,0 +1,73 @@
+---
+title: "Classification Metrics"
+format: html
+editor: visual
+---
+
+# Classification Metrics
+
+```{r}
+#| title: add-dataset
+#| echo: false
+#| message: false
+
+library(dplyr)
+library(ggplot2)
+library(caret)
+
+penguin_df <- read.csv("penguin_predictions.csv")
+
+
+threshold_change <- function( df, x){
+  
+  for(i in 1:length(df[,2])){
+    if(df[i, 1] >= x){
+      df[i,".pred_class"] <- "female"
+    }
+    
+  }
+  return(df)
+}
+
+penguins_CM <- function( df ){
+  
+  actual = factor(df[,3], levels = c("female", "male"))
+  predicted = factor(df[,2], levels = c("female", "male"))
+  
+  confusionMatrix(predicted, actual, mode ="everything")
+}
+```
+
+### Male vs Female Distribution
+
+```{r}
+#| title: null-error-rate
+
+nr <- sum(penguin_df$sex == "female")
+
+nullErrorRate = 1 - (nr / length(penguin_df$sex))
+
+ggplot(data = penguin_df, aes(x = sex )) + 
+  geom_bar(fill = "steelblue") 
+```
+
+Knowing the null error rate gives us a baseline understanding of whether our approach is accurate. If guessing the hypothesis every time is correct more than 95% of the time, then our model may appear to be accurate, but would never actually predict anything.
+
+```{r}
+#| title: confusion-matrix
+
+pThresh2 <- threshold_change(penguin_df, .2)
+pThresh5 <- threshold_change(penguin_df, .5)
+pThresh8 <- threshold_change(penguin_df, .8)
+
+penguins_CM(pThresh2)
+penguins_CM(pThresh5)
+penguins_CM(pThresh8)
+
+```
+
+Accuracy is noted in the above tables, Pos Pred value is the precision, recall is sensitivity, and F1 is explicit in the output.
+
+### Threshold Use Cases
+
+A low threshold like .2 for confusion matrices can be used when a false positive is less detrimental. If a doctor sees you have over a 20 percent chance to have a particular disease and the cost of testing is low, then a lower threshold would be preferable. A threshold of .8 would be preferred if a false positive was more detrimental. In the same scenario I would want my doctor to be more than 80 percent sure if they need to do a more invasive test with harsher consequences like a bone marrow biopsy.
