@@ -1,0 +1,9 @@
+---
+title: "Global Baseline Estimate Approach"
+format: html
+editor: visual
+---
+
+## Approach
+
+For this assignment I will most likely add a few more people to my list so it can be a little bigger and easier to implement the recommendations. I will need to look into each algorithm, but with a smaller dataset it will most likely be best to use the global baseline estimate for this project
