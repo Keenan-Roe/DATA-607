@@ -1,0 +1,101 @@
+---
+title: "Global Baseline Estimates"
+format: html
+editor: visual
+---
+
+# Global Baseline Estimates 
+
+## Introduction
+
+The simplest way to recommend a movie is based on the global baseline estimate. We will take the mean movie rating for all movies add the relative rating of the movie we are looking to evaluate for recommendation, and finally add the average rating of the particular user we are looking to recommend for. The current average of all movies being evaluated in the dataset is 3.93 and we can use this as a universal constant.
+
+```{r}
+#| title: load-data
+#| echo: FALSE
+
+library(gt)
+#load in data
+df <- read.csv("MovieRatings.csv")
+#this will be the dataframe used for recommendations
+estimatedf <- df 
+#remove data and replace it with 0s 
+estimatedf[1:16,2:7] <- 0
+# this is a universal constant from the dataframe used for our calcualations
+ua <-df[17,"user.avg"]
+
+```
+
+## The Formula 
+
+The formula being used is in the below code snippet. We will take the universal average rating names ua for universal average, then take the user average score in the 18th column, and finally take the users personal movie average minus the mean movie average.
+
+In order to find which movies to be evaluated, we will get the index of all NA values in the original dataset for each user so we know which movies need a recommendation score. Then we will cap the score at 5 so it can be more akin to a regular user score.
+
+```{r}
+#| title: estimates
+
+
+for( i in 2:(length(df)-2)){
+  
+  naValues<-which(is.na(df[,i]))
+  for( j in 1:length(naValues)){
+    if ( (ua + df[18,i] + df[naValues[j],9] ) <= 5 ){
+      estimatedf[naValues[j],i] <- (ua + df[18,i] + df[naValues[j],9] )
+    } else { 
+      estimatedf[naValues[j],i] <- 5
+    }
+  }
+  
+}
+
+```
+
+## Recommendation score table 
+
+We are left with a table with all of the recommendation scores in the same style as the original dataset
+
+```{r}
+#| title: table
+#| echo: false
+#| layout-ncol: 2
+
+estimatedf |> 
+  gt() |> 
+  tab_header( title = "Global Baseline scores" )
+```
+
+## Recommendations
+
+At this point we can create a dataframe that has the names of each critic and extract the name of the movie recommended as well as the predicted score and display it as a recommendation. All critics that have seen all provided movies will be removed.
+
+```{r}
+#| title: recommendation
+
+names <- df$Critic[1:16]
+movies <-  vector( mode = "character", 16)
+pred.score <- vector( mode = "numeric", 16)
+
+recdf <- data.frame(Critic = names, 
+                    movie.rec = movies, 
+                    predicted_score = pred.score)
+
+for( i in 1:length(recdf$Critic)){
+  
+  recdf[i,3] <- max(estimatedf[i,2:6])
+  recdf[i,2] <- names(which.max(estimatedf[i,2:6]))
+}
+
+recdf <- subset(recdf, predicted_score > 0 )
+
+```
+
+```{r}
+#| title: table-2
+#| echo: false
+
+recdf |> 
+  gt() |> 
+  tab_header( title = "movie recs" )
+
+```
