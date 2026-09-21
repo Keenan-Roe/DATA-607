@@ -1,0 +1,21 @@
+---
+title: "Window Functions"
+format: html
+editor: visual
+---
+
+# Window Functions
+
+## Introduction
+
+```{r}
+#| title: load-data
+#| message: false
+
+getwd()
+
+#df <- read.csv("monthly_sales.csv")
+
+library(lubridate)
+library(dplyr)
+```

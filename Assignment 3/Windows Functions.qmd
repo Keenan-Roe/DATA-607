@@ -1,9 +1,0 @@
----
-title: "Window Functions Approach"
-format: html
-editor: visual
----
-
-## Approach
-
-I plan on using an LLM to generate nice workable data so it's a little easier. This is exactly what I have created in my line of work so it will be a little easier to implement what I have written before. I used lubridate in the past to get moving averages so I look forward to feedback.

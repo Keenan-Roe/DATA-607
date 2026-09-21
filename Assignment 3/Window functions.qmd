@@ -1,0 +1,108 @@
+---
+title: "Window Functions"
+format: html
+editor: visual
+---
+
+## Introduction
+
+To start this time series analysis, I used claude to produce a random time series dataset that looks at sales of four different beverages. For the first dataset I had it look at monthly sales for simplicity, then filtered down to the year to date sales and performed a simple mean calculation for each row of the average amount sold, the average price of the beverage and the average generated revenue.
+
+```{r}
+#| title: load-data
+#| message: false
+
+df <- read.csv("monthly_sales.csv")
+
+library(lubridate)
+library(dplyr)
+
+ytdDF <- df |>
+  filter(date >= "2026-01-01")
+
+items <- unique(df$item)
+units_sold <- vector( mode = "numeric", length(items))
+avg_price <- vector( mode = "numeric", length(items))
+revenue <- vector( mode = "numeric", length(items))
+
+ytdAvg <- data.frame( items = items, 
+                      avg_sold = units_sold,
+                      ytd_average_price = avg_price,
+                      avg_rev =revenue)
+
+
+for ( i in 1:length(ytdAvg$items)){
+  
+  tempdf <- ytdDF |>
+    filter(item == ytdAvg[i,1])
+  
+  tempvec <- c(mean(tempdf$units_sold), mean(tempdf$avg_price), mean(tempdf$revenue))
+  
+  ytdAvg[i,2:4] <-tempvec
+  
+  rm(tempdf)
+  rm(tempvec)
+  
+}
+
+```
+
+```{r}
+#| title: table-1
+#| echo: false
+
+library(gt)
+
+ytdAvg |> 
+  gt() |> 
+  tab_header( title = "Average sales and revenue" )
+
+```
+
+## monthly sales
+
+Since I used simpler data earlier in the project, I asked claude to create another dataset that looks at the sales for this particular month and used lubridate to filter it down to last 6 days. and performed the same calculations on this dataset.
+
+```{r}
+#| title: monthly-sales 
+
+df_2 <- read.csv("daily_sales.csv")
+
+daily_sales_6_days <- df_2 |>
+  filter( date > today() - days(6) )
+
+rm(items, units_sold, avg_price, revenue)
+
+items <- unique(df_2$item)
+units_sold <- vector( mode = "numeric", length(items))
+avg_price <- vector( mode = "numeric", length(items))
+revenue <- vector( mode = "numeric", length(items))
+
+sixDayAvg <- data.frame( items = items, 
+                      avg_sold = units_sold,
+                      ytd_average_price = avg_price,
+                      avg_rev =revenue)
+
+for ( i in 1:length(sixDayAvg$items)){
+  
+  tempdf <- daily_sales_6_days |>
+    filter(item == sixDayAvg[i,1])
+  
+  tempvec <- c(mean(tempdf$units_sold), mean(tempdf$avg_price), mean(tempdf$revenue))
+  
+  sixDayAvg[i,2:4] <-tempvec
+  
+}
+
+```
+
+```{r}
+#| title: table-2
+#| echo: false
+
+
+sixDayAvg |> 
+  gt() |> 
+  tab_header( title = "Average sales and revenue" )
+
+```

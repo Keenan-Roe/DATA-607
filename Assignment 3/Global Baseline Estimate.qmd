@@ -4,7 +4,7 @@ format: html
 editor: visual
 ---
 
-# Global Baseline Estimates 
+# Global Baseline Estimates
 
 ## Introduction
 
@@ -26,7 +26,7 @@ ua <-df[17,"user.avg"]
 
 ```
 
-## The Formula 
+## The Formula
 
 The formula being used is in the below code snippet. We will take the universal average rating names ua for universal average, then take the user average score in the 18th column, and finally take the users personal movie average minus the mean movie average.
 
@@ -51,7 +51,7 @@ for( i in 2:(length(df)-2)){
 
 ```
 
-## Recommendation score table 
+## Recommendation score table
 
 We are left with a table with all of the recommendation scores in the same style as the original dataset
 
