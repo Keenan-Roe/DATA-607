@@ -4,8 +4,6 @@ format: html
 editor: visual
 ---
 
-# Global Baseline Estimates
-
 ## Introduction
 
 The simplest way to recommend a movie is based on the global baseline estimate. We will take the mean movie rating for all movies add the relative rating of the movie we are looking to evaluate for recommendation, and finally add the average rating of the particular user we are looking to recommend for. The current average of all movies being evaluated in the dataset is 3.93 and we can use this as a universal constant.
