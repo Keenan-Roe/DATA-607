@@ -1,0 +1,25 @@
+---
+title: "Project 1 Approach"
+format: html
+editor: visual
+---
+
+# Approach
+
+Looking at this project the most time consuming part may just be extracting the data from the text file. I sent this file over to claude to help extract what I needed and it approached the problem by using the dashes as comments, but this lead to every other line to be commented due to the -\> that indicates elo change. it then came up with a clever string manipulation, " text = grep("\^-+\\s\*\$", readLines("ELO.txt"), value = TRUE, invert = TRUE) " to remove the lines made entirely of dashes.
+
+here is the link to the two prompts used
+
+<https://claude.ai/share/02e37e32-7141-470e-9176-a5708dbbef69>
+
+I may not stick with this approach as I work on the project, but it can give me a good starting point to start manipulating the data to give me the dataset needed to calculate the elo changes. I intend to extract the data and perform all necessary calculations using the one dataset created from the below code.
+
+```{r}
+#| title: load-data
+
+
+elo <- read.delim("ELO.txt", sep = "|", header = TRUE, comment.char = "-")
+
+elo <- read.delim(text = grep("^-+\\s*$", readLines("ELO.txt"), value = TRUE, invert = TRUE), sep = "|", header = TRUE, strip.white = TRUE)
+
+```
