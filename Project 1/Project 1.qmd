@@ -1,0 +1,135 @@
+---
+title: "Project 1"
+format: html
+editor: visual
+---
+
+# Introduction 
+
+The goal of this project is to perform manipulations from a given text file and create a CSV file that has a players name, state, total points, initial rating, and the average rating of their opponents. To start I will be pulling the text file and read it while cleaning the dataframe
+
+```{r}
+#| title: introduction 
+
+library(tidyverse)
+library(gt)
+
+elo <- read.delim(text = grep("^-+\\s*$", readLines("ELO.txt"), value = TRUE, invert = TRUE), sep = "|", header = TRUE, strip.white = TRUE)
+
+elo <- elo |> 
+  slice(-1) |>
+  select(-X)
+
+```
+
+## Splitting the data 
+
+at this point I have two rows dedicated to information for each player. I will break these rows up into two different dataframes. In addition, I need the starting elo of each player added to one of the dataframes. To achieve this, I used string manipulation to split the string containing the player's id number, starting elo, and ending elo. There was also a provisional rating that we are choosing to ignore that had to be removed from some lines.
+
+```{r}
+#| title: Even-row-manip
+
+odd_rows <- elo |> 
+  filter( row_number() %% 2 == 1)
+
+even_rows <- elo |> 
+  filter(row_number() %% 2 == 0)
+
+eloSplit <- data.frame( 
+  
+  str_split_fixed(
+    
+    str_split_fixed( even_rows[,2],"[R:](.)", 2)[,2] , 
+    
+    "->", 2 )
+) 
+
+names(eloSplit) <- c("starting_elo", "ending_elo")
+
+eloSplit <- eloSplit |> 
+  mutate(
+    across( starting_elo:ending_elo, 
+            \(x) str_remove(x, "P.*")
+    )
+  )
+
+even_rows <- even_rows |> 
+  mutate( eloSplit ) 
+
+```
+
+## Obtaining the Mean elo 
+
+Now that we have moved onto the odd rows, we will need to remove the win/lose/draw indicators in the round elements. Once that is achieved with more string manipulations we can go on to replace the indexes the elements represent with the starting elo of each of the player's opponents. once that is in place we are able to find the rounded mean elo of their opponents and add a column to our odd row dataframe.
+
+```{r}
+#| title: odd-row-manip
+
+odd_rows <- odd_rows |> 
+  mutate( across( Round:Round.6, \(x) gsub("\\D", "", x) ) ) |> 
+  mutate(start_elo = even_rows$starting_elo) |> 
+  mutate(start_elo = as.numeric(str_trim(start_elo)))
+
+elo_lookup <- set_names(odd_rows$start_elo, as.character(odd_rows$Pair))
+
+odd_rows <- odd_rows |>
+  mutate(across(Round:Round.6, ~ elo_lookup[as.character(.)]))
+
+odd_rows <- odd_rows |>
+  rowwise() |> 
+  mutate(row_mean = round( mean(as.numeric(c_across(Round:Round.6)), na.rm = TRUE) ) )|> 
+  ungroup()
+
+
+```
+
+## Putting it All Together 
+
+Now that we have successfully broken down the data we are able to create a new dataframe using information from both dataframes we have created. This will ultimately produce a dataset that has all the relevant player information for each player
+
+```{r}
+#| title: player-data
+
+player_data <- data.frame( 
+  player_name = odd_rows$Player.Name,
+  player_state = even_rows$Pair,
+  total_points = odd_rows$Total,
+  pre_rating = even_rows$starting_elo,
+  average_opponent_rating = odd_rows$row_mean
+)
+
+write.csv(player_data, "player_data.csv")
+
+player_data |> 
+  gt() |>
+  tab_header(title = "Player Data") |>
+  cols_align(align = "left" )
+  
+```
+
+## Analysis Data
+
+```{r}
+#| title: mean-mean
+
+analysis_df <- player_data |> 
+  mutate(differential = as.numeric(pre_rating) - as.numeric(average_opponent_rating) )
+
+mean_mean <- mean(player_data$average_opponent_rating)
+mean_differential <- mean(analysis_df$differential)
+ 
+
+expected_outcome_low = 1 / ( 1 + 10^( (min(as.numeric(analysis_df$pre_rating)) - mean_mean)  /400) )
+
+expected_outcome_high = 1 / ( 1 + 10^( (max(as.numeric(analysis_df$pre_rating)) - mean_mean)  /400) )
+
+analysis_df |> 
+  gt() |>
+  tab_header("Player Data with Average Differential")
+
+library(scales)
+```
+
+## Findings and Conclusion
+
+Looking at the data gathered, we can see that the average player rating is `r mean_mean`. The average difference between the mean player elo and the elo of any given player is `r mean_differential`. This may seem like a fair enough differential, it does not take into account the high variance in the ratings. When taking this into account the percent chance for the average player to beat the worst player is `r percent(expected_outcome_low, accuracy = 0.1)` and the chance for the average player to beat the best player is `r percent(expected_outcome_high, accuracy = 0.1)` the skill discrepancy is very high in this dataset and it could offer a better experience to break this into two different tournaments. The loss of elo may hurt lower rated players less, but it would not offer them the same improvement opportunities as facing similarly skilled opponents.
