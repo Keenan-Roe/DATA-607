@@ -1,0 +1,9 @@
+---
+title: "Airliner Delays Approach"
+format: html
+editor: visual
+---
+
+## The Approach
+
+The spirit of this assignment seems to be tidying data. I will most likely use an LLM to generate a CSV for me that has the same very wide data style of the example but fills in a few more locations and several more airlines. Only the two airlines are required for this assignment, but some exploratory analysis for arrival times can help.

@@ -1,0 +1,11 @@
+---
+title: "Elo calculations Approach"
+format: html
+editor: visual
+---
+
+## Approach
+
+Looking at this I will need a couple different datasets with one holding the current ELO rating of each player after their win or loss for each game and then reference that number for the next Elo change. I looked into the Elo system previously and will use the same k value of 32 as was in the video to try to obtain similar results.
+
+In addition, I will track the elo change themselves in a separate dataset to see the accuracy and speed of change of each player.
