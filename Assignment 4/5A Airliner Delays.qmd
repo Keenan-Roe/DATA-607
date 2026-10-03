@@ -1,0 +1,63 @@
+---
+title: "5A Flight Delays"
+format: html
+editor: visual
+---
+
+## Introduction
+
+```{r}
+#| title: create-data
+
+library(tidyverse)
+library(gt)
+
+flights <- data.frame(
+  Airline = c("ALASKA", "ALASKA", "AM WEST", "AM WEST"),
+  Status  = c("on time", "delayed", "on time", "delayed"),
+  `Los Angeles`   = c(497, 62, 694, 117),
+  Phoenix         = c(221, 12, 4840, 415),
+  `San Diego`     = c(212, 20, 383, 65),
+  `San Francisco` = c(503, 102, 320, 129),
+  Seattle         = c(1841, 305, 201, 61),
+  check.names = FALSE
+)
+
+write.csv(flights, "flight_delays.csv")
+
+```
+
+```{r}
+#| title: tidy-data
+
+tidy_flights <- pivot_longer(
+  flights, cols = -c(Airline, Status), 
+  names_to = "City", values_to = "Flights" )
+
+tidy_flights |> 
+  gt() |>
+  tab_header(title = "Flight info")
+
+by_city <- tidy_flights |>
+  pivot_wider(names_from = Status, values_from = Flights) |>
+  mutate(Total = `on time` + delayed,
+         Pct_on_time = round(100 * `on time` / Total, 2),
+         Pct_delayed = round(100 * delayed / Total, 2))
+
+overall <- by_city |>
+  group_by(Airline) |>
+  summarise(on_time = sum(`on time`), delayed = sum(delayed),
+            Total = on_time + delayed,
+            Pct_on_time = round(100 * on_time / Total, 2),
+            Pct_delayed = round(100 * delayed / Total, 2))
+
+
+by_city |> select(Airline, City, Pct_on_time) |>
+  pivot_wider(names_from = Airline, values_from = Pct_on_time)
+```
+
+```{r}
+#| title: graphs
+
+
+```
