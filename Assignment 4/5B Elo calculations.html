@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5B Elo Calculation</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="5B Elo calculations_files/libs/clipboard/clipboard.min.js"></script>
+<script src="5B Elo calculations_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="5B Elo calculations_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="5B Elo calculations_files/libs/quarto-html/popper.min.js"></script>
+<script src="5B Elo calculations_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="5B Elo calculations_files/libs/quarto-html/anchor.min.js"></script>
+<link href="5B Elo calculations_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="5B Elo calculations_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="5B Elo calculations_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="5B Elo calculations_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="5B Elo calculations_files/libs/bootstrap/bootstrap-efbb37e9afcc02144ebbc7afd12a776f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">5B Elo Calculation</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>We will be calculating the elo scores of the players from our first project and compare the expected score to the actual elo change that each player experienced. To do this, we will first get the original data from github used in project 1 and perform the same transformations as the original project.</p>
+<div class="cell" title="get-data">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>lines <span class="ot">&lt;-</span> <span class="fu">readLines</span>(<span class="st">"https://raw.githubusercontent.com/Keenan-Roe/DATA-607/main/Project%201/ELO.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in
+readLines("https://raw.githubusercontent.com/Keenan-Roe/DATA-607/main/Project%201/ELO.txt"):
+incomplete final line found on
+'https://raw.githubusercontent.com/Keenan-Roe/DATA-607/main/Project%201/ELO.txt'</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>elo <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="at">text =</span> <span class="fu">grep</span>(<span class="st">"^-+</span><span class="sc">\\</span><span class="st">s*$"</span>, lines, <span class="at">value =</span> <span class="cn">TRUE</span>, <span class="at">invert =</span> <span class="cn">TRUE</span>), <span class="at">sep =</span> <span class="st">"|"</span>, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">strip.white =</span> <span class="cn">TRUE</span>, <span class="at">row.names =</span> <span class="cn">NULL</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>elo <span class="ot">&lt;-</span> elo <span class="sc">|&gt;</span> </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="sc">-</span><span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>X)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>odd_rows <span class="ot">&lt;-</span> elo <span class="sc">|&gt;</span> </span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>( <span class="fu">row_number</span>() <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>even_rows <span class="ot">&lt;-</span> elo <span class="sc">|&gt;</span> </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>() <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>eloSplit <span class="ot">&lt;-</span> <span class="fu">data.frame</span>( </span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_split_fixed</span>(</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_split_fixed</span>( even_rows[,<span class="dv">2</span>],<span class="st">"[R:](.)"</span>, <span class="dv">2</span>)[,<span class="dv">2</span>] , </span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"-&gt;"</span>, <span class="dv">2</span> )</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>) </span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(eloSplit) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"starting_elo"</span>, <span class="st">"ending_elo"</span>)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>eloSplit <span class="ot">&lt;-</span> eloSplit <span class="sc">|&gt;</span> </span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>( starting_elo<span class="sc">:</span>ending_elo, </span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>            \(x) <span class="fu">str_remove</span>(x, <span class="st">"P.*"</span>)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>even_rows <span class="ot">&lt;-</span> even_rows <span class="sc">|&gt;</span> </span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>( eloSplit ) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="new-dataframes" class="level2">
+<h2 class="anchored" data-anchor-id="new-dataframes">New Dataframes</h2>
+<p>In order to perform our calculations we will create two new data sets that we will use to keep track of the opponents as well as the results of matches separately. We will need to replace the win, lose, and draw indicators with 1, 0, and .5 respectively. This will allow us to us the results data set directly in our calculations later on.</p>
+<div class="cell" title="get-scores">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>opponents <span class="ot">&lt;-</span> odd_rows <span class="sc">|&gt;</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>( <span class="fu">across</span>( Round<span class="sc">:</span>Round<span class="fl">.6</span>, \(x) <span class="fu">gsub</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">D"</span>, <span class="st">""</span>, x) ) ) <span class="sc">|&gt;</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">start_elo =</span> even_rows<span class="sc">$</span>starting_elo) <span class="sc">|&gt;</span> </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">start_elo =</span> <span class="fu">as.numeric</span>(<span class="fu">str_trim</span>(start_elo))) <span class="sc">|&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Player.Name, Round<span class="sc">:</span>Round<span class="fl">.6</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> odd_rows <span class="sc">|&gt;</span> </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>( <span class="fu">across</span>( Round<span class="sc">:</span>Round<span class="fl">.6</span>, \(x) <span class="fu">gsub</span>(<span class="st">"[0-9]"</span>, <span class="st">""</span>, x) ) ) <span class="sc">|&gt;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>( Round<span class="sc">:</span>Round<span class="fl">.6</span>, trimws)) <span class="sc">|&gt;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(Round<span class="sc">:</span>Round<span class="fl">.6</span>, <span class="sc">~</span> <span class="fu">recode</span>(.x, <span class="st">"W"</span> <span class="ot">=</span> <span class="dv">1</span>, <span class="st">"L"</span> <span class="ot">=</span> <span class="dv">0</span>, <span class="st">"D"</span> <span class="ot">=</span> <span class="fl">0.5</span>, <span class="at">.default =</span> <span class="cn">NA_real_</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Player.Name, Round<span class="sc">:</span>Round<span class="fl">.6</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">starting_elo =</span> <span class="fu">as.numeric</span>(even_rows<span class="sc">$</span>starting_elo))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="functions" class="level2">
+<h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<p>In order to perform elo changes we will be using two formulas derived from this <a href="https://www.youtube.com/watch?v=AsYfbmp0To0">video</a>. The basics of the algorithm states that a player facing an opponent with 400 more elo than them means that the opponent has a 10 times higher chance to win. A K-value of 32 is used which will be how much the elo changes with each match. a higher K-value introduces more volatility and change to elo while a lower K-value will result in lower elo changes overall. The previously produced data set with our win/loss/draw numbers will be used in place of score.</p>
+<div class="cell" title="functions">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>E_value <span class="ot">&lt;-</span> <span class="cf">function</span>(p2, p1) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  E <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="dv">10</span><span class="sc">^</span>((p2<span class="sc">-</span>p1)<span class="sc">/</span><span class="dv">400</span>))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>point_change <span class="ot">&lt;-</span> <span class="cf">function</span>( elo, score, E ){</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  newElo <span class="ot">&lt;-</span> elo <span class="sc">+</span> <span class="dv">32</span><span class="sc">*</span>( score <span class="sc">-</span> E )</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="analysis" class="level2">
+<h2 class="anchored" data-anchor-id="analysis">Analysis</h2>
+<p>Now that we have all the pieces we need we can put it all together and even keep track of elo changes in a dataframe. We will create a new data set called elo_results and then update the column starting_elo in our players new starting elo for each match so we will be using their results in the tournament in the calculation. We will need the players elo and their opponent’s elo to calculate the expected score. We will them use that as well as their starting elo and whether they won, lost, or drew to determine the player’s new score. Any NA value can be ignored.</p>
+<div class="cell" title="algorithm">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>elo_results <span class="ot">&lt;-</span> results <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Player.Name, Round<span class="sc">:</span>starting_elo) <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>( <span class="at">expected_score =</span> <span class="dv">0</span> )</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ( i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>(<span class="fu">length</span>(elo_results) <span class="sc">-</span> <span class="dv">2</span>)){</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> ( j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(elo_results<span class="sc">$</span>Round)){</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(elo_results[j,i])){</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>      pElo <span class="ot">&lt;-</span> elo_results[j,<span class="st">"starting_elo"</span>]</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>      opponent <span class="ot">&lt;-</span> opponents[j, i]</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>      opElo <span class="ot">&lt;-</span> results[opponent, <span class="st">"starting_elo"</span>]</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>      s<span class="ot">&lt;-</span><span class="fu">as.numeric</span>(elo_results[j,i])</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>      expected <span class="ot">&lt;-</span> <span class="fu">E_value</span>( opElo, pElo)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>      newElo <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">point_change</span>(pElo, s, expected))</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>      elo_results[j,<span class="st">"expected_score"</span>] <span class="ot">&lt;-</span> expected <span class="sc">+</span> elo_results[j,<span class="st">"expected_score"</span>]</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>      elo_results[j,i] <span class="ot">&lt;-</span> newElo</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>      elo_results[j,<span class="st">"starting_elo"</span>] <span class="ot">&lt;-</span> newElo</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>With these results we see that our final score is different from the final elo score stated in the original file, but this can be down to a different k-value or a different calculation altogether. No provisional rating was used in our calculations either. We can start comparing the expected score vs the actual score each player achieved. We can see there was a large spread of performances, but looking at the top ten performing players compared to their expected score we can see that Aditya Bajaj outperformed themselves by almost 4 whole points with each point mapping onto an unexpected win based on the elo differences.</p>
+<div class="cell" title="elo-compare-2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>score_compare <span class="ot">&lt;-</span> elo_results <span class="sc">|&gt;</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="at">final_elo =</span> starting_elo, expected_score) <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>( <span class="at">players =</span> odd_rows<span class="sc">$</span>Player.Name) <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">starting_elo =</span> <span class="fu">trimws</span>(even_rows<span class="sc">$</span>starting_elo) ) <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>( <span class="at">real_score =</span> odd_rows<span class="sc">$</span>Total) <span class="sc">|&gt;</span> </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>( <span class="at">performance =</span> <span class="fu">as.numeric</span>(real_score) <span class="sc">-</span> <span class="fu">as.numeric</span>(expected_score)) <span class="sc">|&gt;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(starting_elo, <span class="at">.before =</span> final_elo) <span class="sc">|&gt;</span> </span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(players, <span class="at">.before =</span> starting_elo) <span class="sc">|&gt;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(performance))</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>score_compare <span class="sc">|&gt;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(<span class="at">title =</span> <span class="st">"Player Performance"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="msakrxexiu" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#msakrxexiu table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#msakrxexiu thead, #msakrxexiu tbody, #msakrxexiu tfoot, #msakrxexiu tr, #msakrxexiu td, #msakrxexiu th {
+  border-style: none;
+}
+
+#msakrxexiu p {
+  margin: 0;
+  padding: 0;
+}
+
+#msakrxexiu .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#msakrxexiu .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#msakrxexiu .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#msakrxexiu .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#msakrxexiu .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#msakrxexiu .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#msakrxexiu .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#msakrxexiu .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#msakrxexiu .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#msakrxexiu .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#msakrxexiu .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#msakrxexiu .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#msakrxexiu .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#msakrxexiu .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#msakrxexiu .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#msakrxexiu .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#msakrxexiu .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#msakrxexiu .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#msakrxexiu .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#msakrxexiu .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#msakrxexiu .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#msakrxexiu .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#msakrxexiu .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#msakrxexiu .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#msakrxexiu .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#msakrxexiu .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#msakrxexiu .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#msakrxexiu .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#msakrxexiu .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#msakrxexiu .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#msakrxexiu .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#msakrxexiu .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#msakrxexiu .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#msakrxexiu .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#msakrxexiu .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#msakrxexiu .gt_left {
+  text-align: left;
+}
+
+#msakrxexiu .gt_center {
+  text-align: center;
+}
+
+#msakrxexiu .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#msakrxexiu .gt_font_normal {
+  font-weight: normal;
+}
+
+#msakrxexiu .gt_font_bold {
+  font-weight: bold;
+}
+
+#msakrxexiu .gt_font_italic {
+  font-style: italic;
+}
+
+#msakrxexiu .gt_super {
+  font-size: 65%;
+}
+
+#msakrxexiu .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#msakrxexiu .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#msakrxexiu .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#msakrxexiu .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#msakrxexiu .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#msakrxexiu .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#msakrxexiu .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#msakrxexiu .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#msakrxexiu div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<td colspan="6" class="gt_heading gt_title gt_font_normal gt_bottom_border">Player Performance</td>
+</tr>
+<tr class="gt_col_headings even">
+<th id="players" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">players</th>
+<th id="starting_elo" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">starting_elo</th>
+<th id="final_elo" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">final_elo</th>
+<th id="expected_score" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">expected_score</th>
+<th id="real_score" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">real_score</th>
+<th id="performance" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">performance</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">ADITYA BAJAJ</td>
+<td class="gt_row gt_right" headers="starting_elo">1384</td>
+<td class="gt_row gt_right" headers="final_elo">1508</td>
+<td class="gt_row gt_right" headers="expected_score">2.16867362</td>
+<td class="gt_row gt_right" headers="real_score">6.0</td>
+<td class="gt_row gt_right" headers="performance">3.831326380</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">JACOB ALEXANDER LAVALLEY</td>
+<td class="gt_row gt_right" headers="starting_elo">377</td>
+<td class="gt_row gt_right" headers="final_elo">472</td>
+<td class="gt_row gt_right" headers="expected_score">0.05438498</td>
+<td class="gt_row gt_right" headers="real_score">3.0</td>
+<td class="gt_row gt_right" headers="performance">2.945615022</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">ZACHARY JAMES HOUGHTON</td>
+<td class="gt_row gt_right" headers="starting_elo">1220</td>
+<td class="gt_row gt_right" headers="final_elo">1314</td>
+<td class="gt_row gt_right" headers="expected_score">1.58776204</td>
+<td class="gt_row gt_right" headers="real_score">4.5</td>
+<td class="gt_row gt_right" headers="performance">2.912237960</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">ANVIT RAO</td>
+<td class="gt_row gt_right" headers="starting_elo">1365</td>
+<td class="gt_row gt_right" headers="final_elo">1458</td>
+<td class="gt_row gt_right" headers="expected_score">2.09050207</td>
+<td class="gt_row gt_right" headers="real_score">5.0</td>
+<td class="gt_row gt_right" headers="performance">2.909497927</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">AMIYATOSH PWNANANDAM</td>
+<td class="gt_row gt_right" headers="starting_elo">980</td>
+<td class="gt_row gt_right" headers="final_elo">1017</td>
+<td class="gt_row gt_right" headers="expected_score">0.82654413</td>
+<td class="gt_row gt_right" headers="real_score">3.5</td>
+<td class="gt_row gt_right" headers="performance">2.673455867</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">STEFANO LEE</td>
+<td class="gt_row gt_right" headers="starting_elo">1411</td>
+<td class="gt_row gt_right" headers="final_elo">1490</td>
+<td class="gt_row gt_right" headers="expected_score">2.53208421</td>
+<td class="gt_row gt_right" headers="real_score">5.0</td>
+<td class="gt_row gt_right" headers="performance">2.467915791</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">ETHAN GUO</td>
+<td class="gt_row gt_right" headers="starting_elo">935</td>
+<td class="gt_row gt_right" headers="final_elo">1003</td>
+<td class="gt_row gt_right" headers="expected_score">0.38392238</td>
+<td class="gt_row gt_right" headers="real_score">2.5</td>
+<td class="gt_row gt_right" headers="performance">2.116077622</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">DAKSHESH DARURI</td>
+<td class="gt_row gt_right" headers="starting_elo">1553</td>
+<td class="gt_row gt_right" headers="final_elo">1620</td>
+<td class="gt_row gt_right" headers="expected_score">3.91304514</td>
+<td class="gt_row gt_right" headers="real_score">6.0</td>
+<td class="gt_row gt_right" headers="performance">2.086954862</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">SEAN M MC CORMICK</td>
+<td class="gt_row gt_right" headers="starting_elo">853</td>
+<td class="gt_row gt_right" headers="final_elo">872</td>
+<td class="gt_row gt_right" headers="expected_score">0.42438080</td>
+<td class="gt_row gt_right" headers="real_score">2.0</td>
+<td class="gt_row gt_right" headers="performance">1.575619196</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">VIRAJ MOHILE</td>
+<td class="gt_row gt_right" headers="starting_elo">917</td>
+<td class="gt_row gt_right" headers="final_elo">933</td>
+<td class="gt_row gt_right" headers="expected_score">0.48121465</td>
+<td class="gt_row gt_right" headers="real_score">2.0</td>
+<td class="gt_row gt_right" headers="performance">1.518785354</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">MICHAEL R ALDRICH</td>
+<td class="gt_row gt_right" headers="starting_elo">1229</td>
+<td class="gt_row gt_right" headers="final_elo">1275</td>
+<td class="gt_row gt_right" headers="expected_score">2.56234674</td>
+<td class="gt_row gt_right" headers="real_score">4.0</td>
+<td class="gt_row gt_right" headers="performance">1.437653262</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">TEJAS AYYAGARI</td>
+<td class="gt_row gt_right" headers="starting_elo">1011</td>
+<td class="gt_row gt_right" headers="final_elo">1056</td>
+<td class="gt_row gt_right" headers="expected_score">1.13199025</td>
+<td class="gt_row gt_right" headers="real_score">2.5</td>
+<td class="gt_row gt_right" headers="performance">1.368009749</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">HANSHI ZUO</td>
+<td class="gt_row gt_right" headers="starting_elo">1655</td>
+<td class="gt_row gt_right" headers="final_elo">1690</td>
+<td class="gt_row gt_right" headers="expected_score">4.43968368</td>
+<td class="gt_row gt_right" headers="real_score">5.5</td>
+<td class="gt_row gt_right" headers="performance">1.060316318</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">SHIVAM JHA</td>
+<td class="gt_row gt_right" headers="starting_elo">1056</td>
+<td class="gt_row gt_right" headers="final_elo">1075</td>
+<td class="gt_row gt_right" headers="expected_score">1.45682747</td>
+<td class="gt_row gt_right" headers="real_score">2.5</td>
+<td class="gt_row gt_right" headers="performance">1.043172534</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">JUSTIN D SCHILLING</td>
+<td class="gt_row gt_right" headers="starting_elo">1199</td>
+<td class="gt_row gt_right" headers="final_elo">1196</td>
+<td class="gt_row gt_right" headers="expected_score">2.08099360</td>
+<td class="gt_row gt_right" headers="real_score">3.0</td>
+<td class="gt_row gt_right" headers="performance">0.919006404</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">MARISA RICCI</td>
+<td class="gt_row gt_right" headers="starting_elo">1153</td>
+<td class="gt_row gt_right" headers="final_elo">1150</td>
+<td class="gt_row gt_right" headers="expected_score">1.09722875</td>
+<td class="gt_row gt_right" headers="real_score">2.0</td>
+<td class="gt_row gt_right" headers="performance">0.902771250</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">JULIA SHEN</td>
+<td class="gt_row gt_right" headers="starting_elo">967</td>
+<td class="gt_row gt_right" headers="final_elo">980</td>
+<td class="gt_row gt_right" headers="expected_score">0.61279349</td>
+<td class="gt_row gt_right" headers="real_score">1.5</td>
+<td class="gt_row gt_right" headers="performance">0.887206512</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">SIDDHARTH JHA</td>
+<td class="gt_row gt_right" headers="starting_elo">1355</td>
+<td class="gt_row gt_right" headers="final_elo">1364</td>
+<td class="gt_row gt_right" headers="expected_score">2.71093584</td>
+<td class="gt_row gt_right" headers="real_score">3.5</td>
+<td class="gt_row gt_right" headers="performance">0.789064157</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">PATRICK H SCHILLING</td>
+<td class="gt_row gt_right" headers="starting_elo">1716</td>
+<td class="gt_row gt_right" headers="final_elo">1739</td>
+<td class="gt_row gt_right" headers="expected_score">4.80496759</td>
+<td class="gt_row gt_right" headers="real_score">5.5</td>
+<td class="gt_row gt_right" headers="performance">0.695032412</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">BRIAN LIU</td>
+<td class="gt_row gt_right" headers="starting_elo">1423</td>
+<td class="gt_row gt_right" headers="final_elo">1430</td>
+<td class="gt_row gt_right" headers="expected_score">2.30817863</td>
+<td class="gt_row gt_right" headers="real_score">3.0</td>
+<td class="gt_row gt_right" headers="performance">0.691821368</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">GARY HUA</td>
+<td class="gt_row gt_right" headers="starting_elo">1794</td>
+<td class="gt_row gt_right" headers="final_elo">1818</td>
+<td class="gt_row gt_right" headers="expected_score">5.31125667</td>
+<td class="gt_row gt_right" headers="real_score">6.0</td>
+<td class="gt_row gt_right" headers="performance">0.688743335</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">MICHAEL LU</td>
+<td class="gt_row gt_right" headers="starting_elo">1092</td>
+<td class="gt_row gt_right" headers="final_elo">1082</td>
+<td class="gt_row gt_right" headers="expected_score">1.31894138</td>
+<td class="gt_row gt_right" headers="real_score">2.0</td>
+<td class="gt_row gt_right" headers="performance">0.681058617</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">KYLE WILLIAM MURPHY</td>
+<td class="gt_row gt_right" headers="starting_elo">1403</td>
+<td class="gt_row gt_right" headers="final_elo">1391</td>
+<td class="gt_row gt_right" headers="expected_score">2.35964011</td>
+<td class="gt_row gt_right" headers="real_score">3.0</td>
+<td class="gt_row gt_right" headers="performance">0.640359888</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">ALEX KONG</td>
+<td class="gt_row gt_right" headers="starting_elo">1186</td>
+<td class="gt_row gt_right" headers="final_elo">1171</td>
+<td class="gt_row gt_right" headers="expected_score">1.43119149</td>
+<td class="gt_row gt_right" headers="real_score">2.0</td>
+<td class="gt_row gt_right" headers="performance">0.568808511</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">JEZZEL FARKAS</td>
+<td class="gt_row gt_right" headers="starting_elo">955</td>
+<td class="gt_row gt_right" headers="final_elo">971</td>
+<td class="gt_row gt_right" headers="expected_score">1.03985539</td>
+<td class="gt_row gt_right" headers="real_score">1.5</td>
+<td class="gt_row gt_right" headers="performance">0.460144612</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">KENNETH J TACK</td>
+<td class="gt_row gt_right" headers="starting_elo">1663</td>
+<td class="gt_row gt_right" headers="final_elo">1657</td>
+<td class="gt_row gt_right" headers="expected_score">4.17359481</td>
+<td class="gt_row gt_right" headers="real_score">4.5</td>
+<td class="gt_row gt_right" headers="performance">0.326405194</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">JOSE C YBARRA</td>
+<td class="gt_row gt_right" headers="starting_elo">1393</td>
+<td class="gt_row gt_right" headers="final_elo">1371</td>
+<td class="gt_row gt_right" headers="expected_score">1.69355416</td>
+<td class="gt_row gt_right" headers="real_score">2.0</td>
+<td class="gt_row gt_right" headers="performance">0.306445845</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">GARY DEE SWATHELL</td>
+<td class="gt_row gt_right" headers="starting_elo">1649</td>
+<td class="gt_row gt_right" headers="final_elo">1658</td>
+<td class="gt_row gt_right" headers="expected_score">4.71577996</td>
+<td class="gt_row gt_right" headers="real_score">5.0</td>
+<td class="gt_row gt_right" headers="performance">0.284220041</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">BRADLEY SHAW</td>
+<td class="gt_row gt_right" headers="starting_elo">1610</td>
+<td class="gt_row gt_right" headers="final_elo">1619</td>
+<td class="gt_row gt_right" headers="expected_score">4.25707436</td>
+<td class="gt_row gt_right" headers="real_score">4.5</td>
+<td class="gt_row gt_right" headers="performance">0.242925643</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">MIKE NIKITIN</td>
+<td class="gt_row gt_right" headers="starting_elo">1604</td>
+<td class="gt_row gt_right" headers="final_elo">1595</td>
+<td class="gt_row gt_right" headers="expected_score">3.77906283</td>
+<td class="gt_row gt_right" headers="real_score">4.0</td>
+<td class="gt_row gt_right" headers="performance">0.220937174</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">ASHWIN BALAJI</td>
+<td class="gt_row gt_right" headers="starting_elo">1530</td>
+<td class="gt_row gt_right" headers="final_elo">1534</td>
+<td class="gt_row gt_right" headers="expected_score">0.87870495</td>
+<td class="gt_row gt_right" headers="real_score">1.0</td>
+<td class="gt_row gt_right" headers="performance">0.121295049</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">MICHAEL JEFFERY THOMAS</td>
+<td class="gt_row gt_right" headers="starting_elo">1399</td>
+<td class="gt_row gt_right" headers="final_elo">1402</td>
+<td class="gt_row gt_right" headers="expected_score">3.40318973</td>
+<td class="gt_row gt_right" headers="real_score">3.5</td>
+<td class="gt_row gt_right" headers="performance">0.096810271</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">HANSEN SONG</td>
+<td class="gt_row gt_right" headers="starting_elo">1686</td>
+<td class="gt_row gt_right" headers="final_elo">1690</td>
+<td class="gt_row gt_right" headers="expected_score">4.90331271</td>
+<td class="gt_row gt_right" headers="real_score">5.0</td>
+<td class="gt_row gt_right" headers="performance">0.096687288</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">ALAN BUI</td>
+<td class="gt_row gt_right" headers="starting_elo">1363</td>
+<td class="gt_row gt_right" headers="final_elo">1364</td>
+<td class="gt_row gt_right" headers="expected_score">3.94740377</td>
+<td class="gt_row gt_right" headers="real_score">4.0</td>
+<td class="gt_row gt_right" headers="performance">0.052596234</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">SOFIA ADINA STANESCU-BELLU</td>
+<td class="gt_row gt_right" headers="starting_elo">1507</td>
+<td class="gt_row gt_right" headers="final_elo">1508</td>
+<td class="gt_row gt_right" headers="expected_score">3.45623347</td>
+<td class="gt_row gt_right" headers="real_score">3.5</td>
+<td class="gt_row gt_right" headers="performance">0.043766532</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">EZEKIEL HOUGHTON</td>
+<td class="gt_row gt_right" headers="starting_elo">1641</td>
+<td class="gt_row gt_right" headers="final_elo">1641</td>
+<td class="gt_row gt_right" headers="expected_score">4.98020667</td>
+<td class="gt_row gt_right" headers="real_score">5.0</td>
+<td class="gt_row gt_right" headers="performance">0.019793331</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">DANIEL KHAIN</td>
+<td class="gt_row gt_right" headers="starting_elo">1382</td>
+<td class="gt_row gt_right" headers="final_elo">1350</td>
+<td class="gt_row gt_right" headers="expected_score">2.48699897</td>
+<td class="gt_row gt_right" headers="real_score">2.5</td>
+<td class="gt_row gt_right" headers="performance">0.013001027</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">MICHAEL J MARTIN</td>
+<td class="gt_row gt_right" headers="starting_elo">1291</td>
+<td class="gt_row gt_right" headers="final_elo">1275</td>
+<td class="gt_row gt_right" headers="expected_score">2.49431675</td>
+<td class="gt_row gt_right" headers="real_score">2.5</td>
+<td class="gt_row gt_right" headers="performance">0.005683253</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">FOREST ZHANG</td>
+<td class="gt_row gt_right" headers="starting_elo">1348</td>
+<td class="gt_row gt_right" headers="final_elo">1348</td>
+<td class="gt_row gt_right" headers="expected_score">3.00448145</td>
+<td class="gt_row gt_right" headers="real_score">3.0</td>
+<td class="gt_row gt_right" headers="performance">-0.004481449</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">JOSHUA PHILIP MATHEWS</td>
+<td class="gt_row gt_right" headers="starting_elo">1441</td>
+<td class="gt_row gt_right" headers="final_elo">1435</td>
+<td class="gt_row gt_right" headers="expected_score">3.70759243</td>
+<td class="gt_row gt_right" headers="real_score">3.5</td>
+<td class="gt_row gt_right" headers="performance">-0.207592430</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">DINH DANG BUI</td>
+<td class="gt_row gt_right" headers="starting_elo">1563</td>
+<td class="gt_row gt_right" headers="final_elo">1553</td>
+<td class="gt_row gt_right" headers="expected_score">4.30016844</td>
+<td class="gt_row gt_right" headers="real_score">4.0</td>
+<td class="gt_row gt_right" headers="performance">-0.300168444</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">DIPANKAR ROY</td>
+<td class="gt_row gt_right" headers="starting_elo">1564</td>
+<td class="gt_row gt_right" headers="final_elo">1554</td>
+<td class="gt_row gt_right" headers="expected_score">4.32131587</td>
+<td class="gt_row gt_right" headers="real_score">4.0</td>
+<td class="gt_row gt_right" headers="performance">-0.321315867</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">EUGENE L MCCLURE</td>
+<td class="gt_row gt_right" headers="starting_elo">1555</td>
+<td class="gt_row gt_right" headers="final_elo">1527</td>
+<td class="gt_row gt_right" headers="expected_score">4.37064681</td>
+<td class="gt_row gt_right" headers="real_score">4.0</td>
+<td class="gt_row gt_right" headers="performance">-0.370646814</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">THOMAS JOSEPH HOSMER</td>
+<td class="gt_row gt_right" headers="starting_elo">1175</td>
+<td class="gt_row gt_right" headers="final_elo">1148</td>
+<td class="gt_row gt_right" headers="expected_score">1.38637425</td>
+<td class="gt_row gt_right" headers="real_score">1.0</td>
+<td class="gt_row gt_right" headers="performance">-0.386374246</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">TORRANCE HENRY JR</td>
+<td class="gt_row gt_right" headers="starting_elo">1666</td>
+<td class="gt_row gt_right" headers="final_elo">1652</td>
+<td class="gt_row gt_right" headers="expected_score">4.95932794</td>
+<td class="gt_row gt_right" headers="real_score">4.5</td>
+<td class="gt_row gt_right" headers="performance">-0.459327945</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">GAURAV GIDWANI</td>
+<td class="gt_row gt_right" headers="starting_elo">1552</td>
+<td class="gt_row gt_right" headers="final_elo">1536</td>
+<td class="gt_row gt_right" headers="expected_score">3.97479215</td>
+<td class="gt_row gt_right" headers="real_score">3.5</td>
+<td class="gt_row gt_right" headers="performance">-0.474792155</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">RONALD GRZEGORCZYK</td>
+<td class="gt_row gt_right" headers="starting_elo">1629</td>
+<td class="gt_row gt_right" headers="final_elo">1608</td>
+<td class="gt_row gt_right" headers="expected_score">4.61919372</td>
+<td class="gt_row gt_right" headers="real_score">4.0</td>
+<td class="gt_row gt_right" headers="performance">-0.619193717</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">DAVID SUNDEEN</td>
+<td class="gt_row gt_right" headers="starting_elo">1600</td>
+<td class="gt_row gt_right" headers="final_elo">1580</td>
+<td class="gt_row gt_right" headers="expected_score">4.63922173</td>
+<td class="gt_row gt_right" headers="real_score">4.0</td>
+<td class="gt_row gt_right" headers="performance">-0.639221732</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">MAX ZHU</td>
+<td class="gt_row gt_right" headers="starting_elo">1579</td>
+<td class="gt_row gt_right" headers="final_elo">1558</td>
+<td class="gt_row gt_right" headers="expected_score">4.16397110</td>
+<td class="gt_row gt_right" headers="real_score">3.5</td>
+<td class="gt_row gt_right" headers="performance">-0.663971097</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">ERIC WRIGHT</td>
+<td class="gt_row gt_right" headers="starting_elo">1362</td>
+<td class="gt_row gt_right" headers="final_elo">1341</td>
+<td class="gt_row gt_right" headers="expected_score">3.16767053</td>
+<td class="gt_row gt_right" headers="real_score">2.5</td>
+<td class="gt_row gt_right" headers="performance">-0.667670530</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">JOEL R HENDON</td>
+<td class="gt_row gt_right" headers="starting_elo">1436</td>
+<td class="gt_row gt_right" headers="final_elo">1414</td>
+<td class="gt_row gt_right" headers="expected_score">3.67349820</td>
+<td class="gt_row gt_right" headers="real_score">3.0</td>
+<td class="gt_row gt_right" headers="performance">-0.673498202</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">CAMERON WILLIAM MC LEMAN</td>
+<td class="gt_row gt_right" headers="starting_elo">1712</td>
+<td class="gt_row gt_right" headers="final_elo">1689</td>
+<td class="gt_row gt_right" headers="expected_score">5.24309850</td>
+<td class="gt_row gt_right" headers="real_score">4.5</td>
+<td class="gt_row gt_right" headers="performance">-0.743098499</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">CHIEDOZIE OKORIE</td>
+<td class="gt_row gt_right" headers="starting_elo">1602</td>
+<td class="gt_row gt_right" headers="final_elo">1568</td>
+<td class="gt_row gt_right" headers="expected_score">4.53555264</td>
+<td class="gt_row gt_right" headers="real_score">3.5</td>
+<td class="gt_row gt_right" headers="performance">-1.035552639</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">JASON ZHENG</td>
+<td class="gt_row gt_right" headers="starting_elo">1595</td>
+<td class="gt_row gt_right" headers="final_elo">1560</td>
+<td class="gt_row gt_right" headers="expected_score">5.05829470</td>
+<td class="gt_row gt_right" headers="real_score">4.0</td>
+<td class="gt_row gt_right" headers="performance">-1.058294698</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">JADE GE</td>
+<td class="gt_row gt_right" headers="starting_elo">1449</td>
+<td class="gt_row gt_right" headers="final_elo">1414</td>
+<td class="gt_row gt_right" headers="expected_score">4.60393487</td>
+<td class="gt_row gt_right" headers="real_score">3.5</td>
+<td class="gt_row gt_right" headers="performance">-1.103934873</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">DEREK YAN</td>
+<td class="gt_row gt_right" headers="starting_elo">1242</td>
+<td class="gt_row gt_right" headers="final_elo">1205</td>
+<td class="gt_row gt_right" headers="expected_score">4.12477935</td>
+<td class="gt_row gt_right" headers="real_score">3.0</td>
+<td class="gt_row gt_right" headers="performance">-1.124779346</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">ROBERT GLEN VASEY</td>
+<td class="gt_row gt_right" headers="starting_elo">1283</td>
+<td class="gt_row gt_right" headers="final_elo">1246</td>
+<td class="gt_row gt_right" headers="expected_score">4.17559653</td>
+<td class="gt_row gt_right" headers="real_score">3.0</td>
+<td class="gt_row gt_right" headers="performance">-1.175596525</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">LARRY HODGE</td>
+<td class="gt_row gt_right" headers="starting_elo">1270</td>
+<td class="gt_row gt_right" headers="final_elo">1201</td>
+<td class="gt_row gt_right" headers="expected_score">3.18362413</td>
+<td class="gt_row gt_right" headers="real_score">2.0</td>
+<td class="gt_row gt_right" headers="performance">-1.183624134</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">JOSHUA DAVID LEE</td>
+<td class="gt_row gt_right" headers="starting_elo">1438</td>
+<td class="gt_row gt_right" headers="final_elo">1399</td>
+<td class="gt_row gt_right" headers="expected_score">4.71504968</td>
+<td class="gt_row gt_right" headers="real_score">3.5</td>
+<td class="gt_row gt_right" headers="performance">-1.215049677</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">BEN LI</td>
+<td class="gt_row gt_right" headers="starting_elo">1163</td>
+<td class="gt_row gt_right" headers="final_elo">1123</td>
+<td class="gt_row gt_right" headers="expected_score">2.22311786</td>
+<td class="gt_row gt_right" headers="real_score">1.0</td>
+<td class="gt_row gt_right" headers="performance">-1.223117855</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">RISHI SHETTY</td>
+<td class="gt_row gt_right" headers="starting_elo">1494</td>
+<td class="gt_row gt_right" headers="final_elo">1451</td>
+<td class="gt_row gt_right" headers="expected_score">4.85276303</td>
+<td class="gt_row gt_right" headers="real_score">3.5</td>
+<td class="gt_row gt_right" headers="performance">-1.352763035</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">JARED GE</td>
+<td class="gt_row gt_right" headers="starting_elo">1332</td>
+<td class="gt_row gt_right" headers="final_elo">1278</td>
+<td class="gt_row gt_right" headers="expected_score">4.72778870</td>
+<td class="gt_row gt_right" headers="real_score">3.0</td>
+<td class="gt_row gt_right" headers="performance">-1.727788703</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="players">GEORGE AVERY JONES</td>
+<td class="gt_row gt_right" headers="starting_elo">1522</td>
+<td class="gt_row gt_right" headers="final_elo">1450</td>
+<td class="gt_row gt_right" headers="expected_score">5.77312629</td>
+<td class="gt_row gt_right" headers="real_score">3.5</td>
+<td class="gt_row gt_right" headers="performance">-2.273126293</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="players">LOREN SCHWIEBERT</td>
+<td class="gt_row gt_right" headers="starting_elo">1745</td>
+<td class="gt_row gt_right" headers="final_elo">1661</td>
+<td class="gt_row gt_right" headers="expected_score">6.10105844</td>
+<td class="gt_row gt_right" headers="real_score">3.5</td>
+<td class="gt_row gt_right" headers="performance">-2.601058445</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(score_compare, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(players, <span class="sc">-</span>performance), <span class="at">y =</span> performance)) <span class="sc">+</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"steelblue"</span>) <span class="sc">+</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">3</span>)) <span class="sc">+</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Player"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5B-Elo-calculations_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>top10 <span class="ot">&lt;-</span> score_compare <span class="sc">|&gt;</span> </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(performance)) <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">10</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>( top10, <span class="fu">aes</span>( <span class="at">x =</span> <span class="fu">reorder</span> ( players, <span class="sc">-</span>performance ), <span class="at">y =</span> performance)) <span class="sc">+</span> </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>( <span class="at">fill =</span> <span class="st">"firebrick"</span>)<span class="sc">+</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>( <span class="at">axis.text.x =</span> <span class="fu">element_text</span>( <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span> )) <span class="sc">+</span> </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>( <span class="at">x =</span> <span class="st">"Players"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5B-Elo-calculations_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>bottom10 <span class="ot">&lt;-</span> score_compare <span class="sc">|&gt;</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(performance) <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">10</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>( bottom10, <span class="fu">aes</span>( <span class="at">x =</span> <span class="fu">reorder</span> ( players, <span class="sc">-</span>performance ), <span class="at">y =</span> performance)) <span class="sc">+</span> </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>( <span class="at">fill =</span> <span class="st">"orangered"</span>)<span class="sc">+</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>( <span class="at">axis.text.x =</span> <span class="fu">element_text</span>( <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span> )) <span class="sc">+</span> </span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>( <span class="at">x =</span> <span class="st">"Players"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5B-Elo-calculations_files/figure-html/unnamed-chunk-5-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>the results are a fairly even spread when looking at a 5 to 6 game average. The total difference between the top performing player and the lowest performing player is 6.4323848. A max differential in this format would be a number approaching 12 with one player winning all 6 games when they are expected to lose all 6 and another player losing all 6 games when they are expected to win all six games.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
