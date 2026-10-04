@@ -106,6 +106,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Starting this project, we need to recreate the given data as a dataframe. This will create a “wide” dataframe that needs to be transposed into a “tall” format for analysis.</p>
 <div class="cell" title="create-data">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
@@ -124,6 +125,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(flights, <span class="st">"flight_delays.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+</section>
+<section id="tidying-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="tidying-the-data">Tidying the data</h2>
+<p>In order to flip the data into a taller style dataframe, we can use the pivot longer from the tidyr package. In much the same way that excel creates a pivot table, this will give use another dataframe that breaks this up the information into the Ariline, Status, City, and number of flights.</p>
 <div class="cell" title="tidy-data">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>tidy_flights <span class="ot">&lt;-</span> <span class="fu">pivot_longer</span>(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  flights, <span class="at">cols =</span> <span class="sc">-</span><span class="fu">c</span>(Airline, Status), </span>
@@ -133,23 +138,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(<span class="at">title =</span> <span class="st">"Flight info"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div id="jhapvpfxza" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#jhapvpfxza table {
+<div id="eqwthmhwhk" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#eqwthmhwhk table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#jhapvpfxza thead, #jhapvpfxza tbody, #jhapvpfxza tfoot, #jhapvpfxza tr, #jhapvpfxza td, #jhapvpfxza th {
+#eqwthmhwhk thead, #eqwthmhwhk tbody, #eqwthmhwhk tfoot, #eqwthmhwhk tr, #eqwthmhwhk td, #eqwthmhwhk th {
   border-style: none;
 }
 
-#jhapvpfxza p {
+#eqwthmhwhk p {
   margin: 0;
   padding: 0;
 }
 
-#jhapvpfxza .gt_table {
+#eqwthmhwhk .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -175,12 +180,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-left-color: #D3D3D3;
 }
 
-#jhapvpfxza .gt_caption {
+#eqwthmhwhk .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#jhapvpfxza .gt_title {
+#eqwthmhwhk .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -192,7 +197,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-width: 0;
 }
 
-#jhapvpfxza .gt_subtitle {
+#eqwthmhwhk .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -204,7 +209,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-width: 0;
 }
 
-#jhapvpfxza .gt_heading {
+#eqwthmhwhk .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -216,13 +221,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#jhapvpfxza .gt_bottom_border {
+#eqwthmhwhk .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#jhapvpfxza .gt_col_headings {
+#eqwthmhwhk .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -237,7 +242,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#jhapvpfxza .gt_col_heading {
+#eqwthmhwhk .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -257,7 +262,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#jhapvpfxza .gt_column_spanner_outer {
+#eqwthmhwhk .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -269,15 +274,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 4px;
 }
 
-#jhapvpfxza .gt_column_spanner_outer:first-child {
+#eqwthmhwhk .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#jhapvpfxza .gt_column_spanner_outer:last-child {
+#eqwthmhwhk .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#jhapvpfxza .gt_column_spanner {
+#eqwthmhwhk .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -289,11 +294,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   width: 100%;
 }
 
-#jhapvpfxza .gt_spanner_row {
+#eqwthmhwhk .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#jhapvpfxza .gt_group_heading {
+#eqwthmhwhk .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -319,7 +324,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   text-align: left;
 }
 
-#jhapvpfxza .gt_empty_group_heading {
+#eqwthmhwhk .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -334,15 +339,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: middle;
 }
 
-#jhapvpfxza .gt_from_md > :first-child {
+#eqwthmhwhk .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#jhapvpfxza .gt_from_md > :last-child {
+#eqwthmhwhk .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#jhapvpfxza .gt_row {
+#eqwthmhwhk .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -361,7 +366,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#jhapvpfxza .gt_stub {
+#eqwthmhwhk .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -374,7 +379,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#jhapvpfxza .gt_stub_row_group {
+#eqwthmhwhk .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -388,15 +393,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: top;
 }
 
-#jhapvpfxza .gt_row_group_first td {
+#eqwthmhwhk .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#jhapvpfxza .gt_row_group_first th {
+#eqwthmhwhk .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#jhapvpfxza .gt_summary_row {
+#eqwthmhwhk .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -406,16 +411,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#jhapvpfxza .gt_first_summary_row {
+#eqwthmhwhk .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#jhapvpfxza .gt_first_summary_row.thick {
+#eqwthmhwhk .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#jhapvpfxza .gt_last_summary_row {
+#eqwthmhwhk .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -425,7 +430,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#jhapvpfxza .gt_grand_summary_row {
+#eqwthmhwhk .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -435,7 +440,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#jhapvpfxza .gt_first_grand_summary_row {
+#eqwthmhwhk .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -445,7 +450,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-color: #D3D3D3;
 }
 
-#jhapvpfxza .gt_last_grand_summary_row_top {
+#eqwthmhwhk .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -455,11 +460,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#jhapvpfxza .gt_striped {
+#eqwthmhwhk .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#jhapvpfxza .gt_table_body {
+#eqwthmhwhk .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -468,7 +473,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#jhapvpfxza .gt_footnotes {
+#eqwthmhwhk .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -482,7 +487,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#jhapvpfxza .gt_footnote {
+#eqwthmhwhk .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -491,7 +496,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#jhapvpfxza .gt_sourcenotes {
+#eqwthmhwhk .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -505,7 +510,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#jhapvpfxza .gt_sourcenote {
+#eqwthmhwhk .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -513,72 +518,72 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#jhapvpfxza .gt_left {
+#eqwthmhwhk .gt_left {
   text-align: left;
 }
 
-#jhapvpfxza .gt_center {
+#eqwthmhwhk .gt_center {
   text-align: center;
 }
 
-#jhapvpfxza .gt_right {
+#eqwthmhwhk .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#jhapvpfxza .gt_font_normal {
+#eqwthmhwhk .gt_font_normal {
   font-weight: normal;
 }
 
-#jhapvpfxza .gt_font_bold {
+#eqwthmhwhk .gt_font_bold {
   font-weight: bold;
 }
 
-#jhapvpfxza .gt_font_italic {
+#eqwthmhwhk .gt_font_italic {
   font-style: italic;
 }
 
-#jhapvpfxza .gt_super {
+#eqwthmhwhk .gt_super {
   font-size: 65%;
 }
 
-#jhapvpfxza .gt_footnote_marks {
+#eqwthmhwhk .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#jhapvpfxza .gt_asterisk {
+#eqwthmhwhk .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#jhapvpfxza .gt_indent_1 {
+#eqwthmhwhk .gt_indent_1 {
   text-indent: 5px;
 }
 
-#jhapvpfxza .gt_indent_2 {
+#eqwthmhwhk .gt_indent_2 {
   text-indent: 10px;
 }
 
-#jhapvpfxza .gt_indent_3 {
+#eqwthmhwhk .gt_indent_3 {
   text-indent: 15px;
 }
 
-#jhapvpfxza .gt_indent_4 {
+#eqwthmhwhk .gt_indent_4 {
   text-indent: 20px;
 }
 
-#jhapvpfxza .gt_indent_5 {
+#eqwthmhwhk .gt_indent_5 {
   text-indent: 25px;
 }
 
-#jhapvpfxza .katex-display {
+#eqwthmhwhk .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#jhapvpfxza div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#eqwthmhwhk div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -721,61 +726,1606 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </div>
 </div>
+</div>
+<p>Continuing the analysis, we can look at the total percentage of the flights that were on time or delayed as well as the total number of flights that each airline handled. Looking at the totals, we can see that AM West had nearly double the amount of flights as Alaska. In addition, Alaska had more flights delayed as a percentage of total flights.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>by_city <span class="ot">&lt;-</span> tidy_flights <span class="sc">|&gt;</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> Status, <span class="at">values_from =</span> Flights) <span class="sc">|&gt;</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Total =</span> <span class="st">`</span><span class="at">on_time</span><span class="st">`</span> <span class="sc">+</span> delayed,</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">Pct_on_time =</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> <span class="st">`</span><span class="at">on_time</span><span class="st">`</span> <span class="sc">/</span> Total, <span class="dv">2</span>),</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">Pct_delayed =</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> delayed <span class="sc">/</span> Total, <span class="dv">2</span>))</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>overall <span class="ot">&lt;-</span> by_city <span class="sc">|&gt;</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Airline) <span class="sc">|&gt;</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">on_time =</span> <span class="fu">sum</span>(<span class="st">`</span><span class="at">on_time</span><span class="st">`</span>), <span class="at">delayed =</span> <span class="fu">sum</span>(delayed),</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">Total =</span> on_time <span class="sc">+</span> delayed,</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">Pct_on_time =</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> on_time <span class="sc">/</span> Total, <span class="dv">2</span>),</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">Pct_delayed =</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> delayed <span class="sc">/</span> Total, <span class="dv">2</span>))</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>by_city <span class="sc">|&gt;</span> <span class="fu">select</span>(Airline, City, Pct_on_time) <span class="sc">|&gt;</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> Airline, <span class="at">values_from =</span> Pct_on_time)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 3
-  City          ALASKA `AM WEST`
-  &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;
-1 Los Angeles     88.9      85.6
-2 Phoenix         94.8      92.1
-3 San Diego       91.4      85.5
-4 San Francisco   83.1      71.3
-5 Seattle         85.8      76.7</code></pre>
-</div>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(by_city, <span class="fu">aes</span>(<span class="at">x =</span> City, <span class="at">y =</span> Pct_on_time, <span class="at">color =</span> Airline, <span class="at">group =</span> Airline)) <span class="sc">+</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"City"</span>,</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Percent on Time"</span>,</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Airlines Percentage of Flights on Time"</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(by_city, <span class="fu">aes</span>( <span class="at">x =</span> City, <span class="at">y =</span> on_time, <span class="at">color =</span> Airline, <span class="at">group =</span> Airline, <span class="at">fill =</span> Airline)) <span class="sc">+</span> </span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>)) <span class="sc">+</span> </span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>( </span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"City"</span>,</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"On Time Flights"</span>, </span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Total On Time Flights"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell quarto-layout-panel" data-layout-ncol="2" title="graphs">
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>by_city <span class="sc">|&gt;</span> </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(<span class="at">title =</span> <span class="st">"Percentage On Time By City"</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>overall <span class="ot">&lt;-</span> by_city <span class="sc">|&gt;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Airline) <span class="sc">|&gt;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">on_time =</span> <span class="fu">sum</span>(<span class="st">`</span><span class="at">on_time</span><span class="st">`</span>), <span class="at">delayed =</span> <span class="fu">sum</span>(delayed),</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">Total =</span> on_time <span class="sc">+</span> delayed,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">Pct_on_time =</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> on_time <span class="sc">/</span> Total, <span class="dv">2</span>),</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">Pct_delayed =</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> delayed <span class="sc">/</span> Total, <span class="dv">2</span>))</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>overall <span class="sc">|&gt;</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(<span class="at">title =</span> <span class="st">"Overall"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell quarto-layout-panel" data-layout-ncol="2" title="temp">
 <div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<p><img src="5A-Airliner-Delays_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+<div id="zqugxejqoa" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#zqugxejqoa table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#zqugxejqoa thead, #zqugxejqoa tbody, #zqugxejqoa tfoot, #zqugxejqoa tr, #zqugxejqoa td, #zqugxejqoa th {
+  border-style: none;
+}
+
+#zqugxejqoa p {
+  margin: 0;
+  padding: 0;
+}
+
+#zqugxejqoa .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#zqugxejqoa .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#zqugxejqoa .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#zqugxejqoa .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#zqugxejqoa .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#zqugxejqoa .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#zqugxejqoa .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#zqugxejqoa .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#zqugxejqoa .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#zqugxejqoa .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#zqugxejqoa .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#zqugxejqoa .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#zqugxejqoa .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#zqugxejqoa .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#zqugxejqoa .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#zqugxejqoa .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#zqugxejqoa .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#zqugxejqoa .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#zqugxejqoa .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zqugxejqoa .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#zqugxejqoa .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#zqugxejqoa .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#zqugxejqoa .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zqugxejqoa .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#zqugxejqoa .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#zqugxejqoa .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#zqugxejqoa .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zqugxejqoa .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#zqugxejqoa .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#zqugxejqoa .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#zqugxejqoa .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#zqugxejqoa .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#zqugxejqoa .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zqugxejqoa .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#zqugxejqoa .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zqugxejqoa .gt_left {
+  text-align: left;
+}
+
+#zqugxejqoa .gt_center {
+  text-align: center;
+}
+
+#zqugxejqoa .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#zqugxejqoa .gt_font_normal {
+  font-weight: normal;
+}
+
+#zqugxejqoa .gt_font_bold {
+  font-weight: bold;
+}
+
+#zqugxejqoa .gt_font_italic {
+  font-style: italic;
+}
+
+#zqugxejqoa .gt_super {
+  font-size: 65%;
+}
+
+#zqugxejqoa .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#zqugxejqoa .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#zqugxejqoa .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#zqugxejqoa .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#zqugxejqoa .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#zqugxejqoa .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#zqugxejqoa .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#zqugxejqoa .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#zqugxejqoa div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<td colspan="7" class="gt_heading gt_title gt_font_normal gt_bottom_border" style="text-align: left;">Percentage On Time By City</td>
+</tr>
+<tr class="gt_col_headings even">
+<th id="Airline" class="gt_col_heading gt_columns_bottom_border gt_left" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">Airline</th>
+<th id="City" class="gt_col_heading gt_columns_bottom_border gt_left" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">City</th>
+<th id="on_time" class="gt_col_heading gt_columns_bottom_border gt_right" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">on_time</th>
+<th id="delayed" class="gt_col_heading gt_columns_bottom_border gt_right" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">delayed</th>
+<th id="Total" class="gt_col_heading gt_columns_bottom_border gt_right" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">Total</th>
+<th id="Pct_on_time" class="gt_col_heading gt_columns_bottom_border gt_right" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">Pct_on_time</th>
+<th id="Pct_delayed" class="gt_col_heading gt_columns_bottom_border gt_right" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">Pct_delayed</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" style="text-align: left;" headers="Airline">ALASKA</td>
+<td class="gt_row gt_left" style="text-align: left;" headers="City">Los Angeles</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="on_time">497</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="delayed">62</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Total">559</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_on_time">88.91</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_delayed">11.09</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" style="text-align: left;" headers="Airline">ALASKA</td>
+<td class="gt_row gt_left" style="text-align: left;" headers="City">Phoenix</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="on_time">221</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="delayed">12</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Total">233</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_on_time">94.85</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_delayed">5.15</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" style="text-align: left;" headers="Airline">ALASKA</td>
+<td class="gt_row gt_left" style="text-align: left;" headers="City">San Diego</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="on_time">212</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="delayed">20</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Total">232</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_on_time">91.38</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_delayed">8.62</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" style="text-align: left;" headers="Airline">ALASKA</td>
+<td class="gt_row gt_left" style="text-align: left;" headers="City">San Francisco</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="on_time">503</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="delayed">102</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Total">605</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_on_time">83.14</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_delayed">16.86</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" style="text-align: left;" headers="Airline">ALASKA</td>
+<td class="gt_row gt_left" style="text-align: left;" headers="City">Seattle</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="on_time">1841</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="delayed">305</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Total">2146</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_on_time">85.79</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_delayed">14.21</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" style="text-align: left;" headers="Airline">AM WEST</td>
+<td class="gt_row gt_left" style="text-align: left;" headers="City">Los Angeles</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="on_time">694</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="delayed">117</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Total">811</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_on_time">85.57</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_delayed">14.43</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" style="text-align: left;" headers="Airline">AM WEST</td>
+<td class="gt_row gt_left" style="text-align: left;" headers="City">Phoenix</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="on_time">4840</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="delayed">415</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Total">5255</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_on_time">92.10</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_delayed">7.90</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" style="text-align: left;" headers="Airline">AM WEST</td>
+<td class="gt_row gt_left" style="text-align: left;" headers="City">San Diego</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="on_time">383</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="delayed">65</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Total">448</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_on_time">85.49</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_delayed">14.51</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" style="text-align: left;" headers="Airline">AM WEST</td>
+<td class="gt_row gt_left" style="text-align: left;" headers="City">San Francisco</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="on_time">320</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="delayed">129</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Total">449</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_on_time">71.27</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_delayed">28.73</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" style="text-align: left;" headers="Airline">AM WEST</td>
+<td class="gt_row gt_left" style="text-align: left;" headers="City">Seattle</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="on_time">201</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="delayed">61</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Total">262</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_on_time">76.72</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_delayed">23.28</td>
+</tr>
+</tbody>
+</table>
+
 </div>
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<p><img src="5A-Airliner-Delays_files/figure-html/unnamed-chunk-3-2.png" class="img-fluid" width="672"></p>
+<div id="tdadxxwveg" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#tdadxxwveg table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#tdadxxwveg thead, #tdadxxwveg tbody, #tdadxxwveg tfoot, #tdadxxwveg tr, #tdadxxwveg td, #tdadxxwveg th {
+  border-style: none;
+}
+
+#tdadxxwveg p {
+  margin: 0;
+  padding: 0;
+}
+
+#tdadxxwveg .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#tdadxxwveg .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#tdadxxwveg .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#tdadxxwveg .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#tdadxxwveg .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#tdadxxwveg .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tdadxxwveg .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#tdadxxwveg .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#tdadxxwveg .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#tdadxxwveg .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#tdadxxwveg .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#tdadxxwveg .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#tdadxxwveg .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#tdadxxwveg .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#tdadxxwveg .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#tdadxxwveg .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#tdadxxwveg .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#tdadxxwveg .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#tdadxxwveg .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tdadxxwveg .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#tdadxxwveg .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#tdadxxwveg .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#tdadxxwveg .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tdadxxwveg .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#tdadxxwveg .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#tdadxxwveg .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tdadxxwveg .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tdadxxwveg .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#tdadxxwveg .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tdadxxwveg .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#tdadxxwveg .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tdadxxwveg .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#tdadxxwveg .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tdadxxwveg .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#tdadxxwveg .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tdadxxwveg .gt_left {
+  text-align: left;
+}
+
+#tdadxxwveg .gt_center {
+  text-align: center;
+}
+
+#tdadxxwveg .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#tdadxxwveg .gt_font_normal {
+  font-weight: normal;
+}
+
+#tdadxxwveg .gt_font_bold {
+  font-weight: bold;
+}
+
+#tdadxxwveg .gt_font_italic {
+  font-style: italic;
+}
+
+#tdadxxwveg .gt_super {
+  font-size: 65%;
+}
+
+#tdadxxwveg .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#tdadxxwveg .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#tdadxxwveg .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#tdadxxwveg .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#tdadxxwveg .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#tdadxxwveg .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#tdadxxwveg .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#tdadxxwveg .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#tdadxxwveg div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<td colspan="6" class="gt_heading gt_title gt_font_normal gt_bottom_border" style="text-align: left;">Overall</td>
+</tr>
+<tr class="gt_col_headings even">
+<th id="Airline" class="gt_col_heading gt_columns_bottom_border gt_left" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">Airline</th>
+<th id="on_time" class="gt_col_heading gt_columns_bottom_border gt_right" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">on_time</th>
+<th id="delayed" class="gt_col_heading gt_columns_bottom_border gt_right" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">delayed</th>
+<th id="Total" class="gt_col_heading gt_columns_bottom_border gt_right" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">Total</th>
+<th id="Pct_on_time" class="gt_col_heading gt_columns_bottom_border gt_right" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">Pct_on_time</th>
+<th id="Pct_delayed" class="gt_col_heading gt_columns_bottom_border gt_right" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">Pct_delayed</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" style="text-align: left;" headers="Airline">ALASKA</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="on_time">3274</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="delayed">501</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Total">3775</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_on_time">86.73</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_delayed">13.27</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" style="text-align: left;" headers="Airline">AM WEST</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="on_time">6438</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="delayed">787</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Total">7225</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_on_time">89.11</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="Pct_delayed">10.89</td>
+</tr>
+</tbody>
+</table>
+
 </div>
 </div>
 </div>
+</section>
+<section id="final-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="final-comparison">Final comparison</h2>
+<p>Alaska is on time more often to every city while also having fewer flights in the majority of cities. When looking at the raw data it does not paint the picture of how many more flights AM West has to Phoenix. The vast majority of flight are with AM West to Phoenix and yet, with the larger sample size we see that AM West still has a lower percentage of on time flights across the board.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>by_city_pct <span class="ot">&lt;-</span> by_city <span class="sc">|&gt;</span> <span class="fu">select</span>(Airline, City, Pct_on_time) <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> Airline, <span class="at">values_from =</span> Pct_on_time)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>by_city_pct <span class="sc">|&gt;</span> </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(<span class="at">title=</span><span class="st">"Percetages"</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(by_city, <span class="fu">aes</span>(<span class="at">x =</span> City, <span class="at">y =</span> Pct_on_time, <span class="at">color =</span> Airline, <span class="at">group =</span> Airline)) <span class="sc">+</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"City"</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Percent on Time"</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Airlines Percentage of Flights on Time"</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(by_city, <span class="fu">aes</span>( <span class="at">x =</span> City, <span class="at">y =</span> on_time, <span class="at">color =</span> Airline, <span class="at">group =</span> Airline, <span class="at">fill =</span> Airline)) <span class="sc">+</span> </span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>)) <span class="sc">+</span> </span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>( </span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"City"</span>,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"On Time Flights"</span>, </span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Total On Time Flights"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell quarto-layout-panel" data-layout-ncol="3" title="graphs">
+<div class="quarto-layout-row">
+<div id="rttklyfymw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#rttklyfymw table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#rttklyfymw thead, #rttklyfymw tbody, #rttklyfymw tfoot, #rttklyfymw tr, #rttklyfymw td, #rttklyfymw th {
+  border-style: none;
+}
+
+#rttklyfymw p {
+  margin: 0;
+  padding: 0;
+}
+
+#rttklyfymw .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#rttklyfymw .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#rttklyfymw .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#rttklyfymw .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#rttklyfymw .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#rttklyfymw .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rttklyfymw .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#rttklyfymw .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#rttklyfymw .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#rttklyfymw .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#rttklyfymw .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#rttklyfymw .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#rttklyfymw .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#rttklyfymw .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#rttklyfymw .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#rttklyfymw .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#rttklyfymw .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#rttklyfymw .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#rttklyfymw .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rttklyfymw .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#rttklyfymw .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#rttklyfymw .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#rttklyfymw .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rttklyfymw .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#rttklyfymw .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#rttklyfymw .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rttklyfymw .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rttklyfymw .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#rttklyfymw .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rttklyfymw .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#rttklyfymw .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rttklyfymw .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#rttklyfymw .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rttklyfymw .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#rttklyfymw .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rttklyfymw .gt_left {
+  text-align: left;
+}
+
+#rttklyfymw .gt_center {
+  text-align: center;
+}
+
+#rttklyfymw .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#rttklyfymw .gt_font_normal {
+  font-weight: normal;
+}
+
+#rttklyfymw .gt_font_bold {
+  font-weight: bold;
+}
+
+#rttklyfymw .gt_font_italic {
+  font-style: italic;
+}
+
+#rttklyfymw .gt_super {
+  font-size: 65%;
+}
+
+#rttklyfymw .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#rttklyfymw .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#rttklyfymw .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#rttklyfymw .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#rttklyfymw .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#rttklyfymw .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#rttklyfymw .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#rttklyfymw .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#rttklyfymw div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<td colspan="3" class="gt_heading gt_title gt_font_normal gt_bottom_border" style="text-align: left;">Percetages</td>
+</tr>
+<tr class="gt_col_headings even">
+<th id="City" class="gt_col_heading gt_columns_bottom_border gt_left" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">City</th>
+<th id="ALASKA" class="gt_col_heading gt_columns_bottom_border gt_right" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">ALASKA</th>
+<th id="AM-WEST" class="gt_col_heading gt_columns_bottom_border gt_right" style="text-align: left;" data-quarto-table-cell-role="th" scope="col">AM WEST</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" style="text-align: left;" headers="City">Los Angeles</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="ALASKA">88.91</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="AM WEST">85.57</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" style="text-align: left;" headers="City">Phoenix</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="ALASKA">94.85</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="AM WEST">92.10</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" style="text-align: left;" headers="City">San Diego</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="ALASKA">91.38</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="AM WEST">85.49</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" style="text-align: left;" headers="City">San Francisco</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="ALASKA">83.14</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="AM WEST">71.27</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" style="text-align: left;" headers="City">Seattle</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="ALASKA">85.79</td>
+<td class="gt_row gt_right" style="text-align: left;" headers="AM WEST">76.72</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
+<p><img src="5A-Airliner-Delays_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
+<p><img src="5A-Airliner-Delays_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</div>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>The percentage of flights that are delayed is heavily correlated with each other between the two airlines. The most likely reason for this will come from conditions both airlines will have to work around such as weather. Alaska has generally fewer flights which would make each delay have more weight for Alaska, however we see that they maintain a higher percentage of on time flights. Phoenix is a massive outlier for AM West, while Seattle is an outlier for Alaska. There is not enough information to identify why AM West is consistently less punctual than Alaska. The next step would need to be gathering information on the delays themselves to compare the reasoning and dates of flights. Directions for this further analysis would include fleet size and ability to cover plane switches, and the maintenance schedules.</p>
 </section>
 
 </main>

@@ -6,6 +6,8 @@ editor: visual
 
 ## Introduction
 
+Starting this project, we need to recreate the given data as a dataframe. This will create a "wide" dataframe that needs to be transposed into a "tall" format for analysis.
+
 ```{r}
 #| title: create-data
 #| message: False
@@ -29,6 +31,10 @@ write.csv(flights, "flight_delays.csv")
 
 ```
 
+## Tidying the data 
+
+In order to flip the data into a taller style dataframe, we can use the pivot longer from the tidyr package. In much the same way that excel creates a pivot table, this will give use another dataframe that breaks this up the information into the Ariline, Status, City, and number of flights.
+
 ```{r}
 #| title: tidy-data
 
@@ -40,11 +46,23 @@ tidy_flights |>
   gt() |>
   tab_header(title = "Flight info")
 
+
+```
+
+Continuing the analysis, we can look at the total percentage of the flights that were on time or delayed as well as the total number of flights that each airline handled. Looking at the totals, we can see that AM West had nearly double the amount of flights as Alaska. In addition, Alaska had more flights delayed as a percentage of total flights.
+
+```{r}
+#| title: temp
+#| layout-ncol: 2
+
 by_city <- tidy_flights |>
   pivot_wider(names_from = Status, values_from = Flights) |>
   mutate(Total = `on_time` + delayed,
          Pct_on_time = round(100 * `on_time` / Total, 2),
          Pct_delayed = round(100 * delayed / Total, 2))
+by_city |> 
+  gt() |> 
+  tab_header(title = "Percentage On Time By City")
 
 overall <- by_city |>
   group_by(Airline) |>
@@ -53,16 +71,26 @@ overall <- by_city |>
             Pct_on_time = round(100 * on_time / Total, 2),
             Pct_delayed = round(100 * delayed / Total, 2))
 
+overall |>
+  gt() |> 
+  tab_header(title = "Overall")
 
-by_city |> select(Airline, City, Pct_on_time) |>
-  pivot_wider(names_from = Airline, values_from = Pct_on_time)
 ```
+
+## Final comparison
+
+Alaska is on time more often to every city while also having fewer flights in the majority of cities. When looking at the raw data it does not paint the picture of how many more flights AM West has to Phoenix. The vast majority of flight are with AM West to Phoenix and yet, with the larger sample size we see that AM West still has a lower percentage of on time flights across the board.
 
 ```{r}
 #| title: graphs
-#| layout-ncol: 2
+#| layout-ncol: 3
 
-library(ggplot2)
+by_city_pct <- by_city |> select(Airline, City, Pct_on_time) |>
+  pivot_wider(names_from = Airline, values_from = Pct_on_time)
+
+by_city_pct |> 
+  gt() |>
+  tab_header(title="Percetages")
 
 ggplot(by_city, aes(x = City, y = Pct_on_time, color = Airline, group = Airline)) +
   geom_line() +
@@ -82,3 +110,7 @@ ggplot(by_city, aes( x = City, y = on_time, color = Airline, group = Airline, fi
     y = "On Time Flights", 
     title = "Total On Time Flights")
 ```
+
+## Conclusion
+
+The percentage of flights that are delayed is heavily correlated with each other between the two airlines. The most likely reason for this will come from conditions both airlines will have to work around such as weather. Alaska has generally fewer flights which would make each delay have more weight for Alaska, however we see that they maintain a higher percentage of on time flights. Phoenix is a massive outlier for AM West, while Seattle is an outlier for Alaska. There is not enough information to identify why AM West is consistently less punctual than Alaska. The next step would need to be gathering information on the delays themselves to compare the reasoning and dates of flights. Directions for this further analysis would include fleet size and ability to cover plane switches, and the maintenance schedules.
