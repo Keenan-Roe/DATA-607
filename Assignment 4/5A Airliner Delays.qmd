@@ -8,13 +8,15 @@ editor: visual
 
 ```{r}
 #| title: create-data
+#| message: False
 
 library(tidyverse)
 library(gt)
+library(ggplot2)
 
 flights <- data.frame(
   Airline = c("ALASKA", "ALASKA", "AM WEST", "AM WEST"),
-  Status  = c("on time", "delayed", "on time", "delayed"),
+  Status  = c("on_time", "delayed", "on_time", "delayed"),
   `Los Angeles`   = c(497, 62, 694, 117),
   Phoenix         = c(221, 12, 4840, 415),
   `San Diego`     = c(212, 20, 383, 65),
@@ -40,13 +42,13 @@ tidy_flights |>
 
 by_city <- tidy_flights |>
   pivot_wider(names_from = Status, values_from = Flights) |>
-  mutate(Total = `on time` + delayed,
-         Pct_on_time = round(100 * `on time` / Total, 2),
+  mutate(Total = `on_time` + delayed,
+         Pct_on_time = round(100 * `on_time` / Total, 2),
          Pct_delayed = round(100 * delayed / Total, 2))
 
 overall <- by_city |>
   group_by(Airline) |>
-  summarise(on_time = sum(`on time`), delayed = sum(delayed),
+  summarise(on_time = sum(`on_time`), delayed = sum(delayed),
             Total = on_time + delayed,
             Pct_on_time = round(100 * on_time / Total, 2),
             Pct_delayed = round(100 * delayed / Total, 2))
@@ -58,6 +60,25 @@ by_city |> select(Airline, City, Pct_on_time) |>
 
 ```{r}
 #| title: graphs
+#| layout-ncol: 2
 
+library(ggplot2)
 
+ggplot(by_city, aes(x = City, y = Pct_on_time, color = Airline, group = Airline)) +
+  geom_line() +
+  geom_point(size = 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    x = "City",
+    y = "Percent on Time",
+    title = "Airlines Percentage of Flights on Time"
+  )
+
+ggplot(by_city, aes( x = City, y = on_time, color = Airline, group = Airline, fill = Airline)) + 
+  geom_col(position = "dodge") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  labs( 
+    x = "City",
+    y = "On Time Flights", 
+    title = "Total On Time Flights")
 ```
