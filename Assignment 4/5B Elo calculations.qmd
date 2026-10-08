@@ -76,7 +76,7 @@ results <- odd_rows |>
 
 ```
 
-## Functions 
+## Functions
 
 In order to perform elo changes we will be using two formulas derived from this [video](https://www.youtube.com/watch?v=AsYfbmp0To0). The basics of the algorithm states that a player facing an opponent with 400 more elo than them means that the opponent has a 10 times higher chance to win. A K-value of 32 is used which will be how much the elo changes with each match. a higher K-value introduces more volatility and change to elo while a lower K-value will result in lower elo changes overall. The previously produced data set with our win/loss/draw numbers will be used in place of score.
 
@@ -94,7 +94,7 @@ point_change <- function( elo, score, E ){
 
 ```
 
-## Analysis 
+## Analysis
 
 Now that we have all the pieces we need we can put it all together and even keep track of elo changes in a dataframe. We will create a new data set called elo_results and then update the column starting_elo in our players new starting elo for each match so we will be using their results in the tournament in the calculation. We will need the players elo and their opponent's elo to calculate the expected score. We will them use that as well as their starting elo and whether they won, lost, or drew to determine the player's new score. Any NA value can be ignored.
 
@@ -178,6 +178,6 @@ ggplot( bottom10, aes( x = reorder ( players, -performance ), y = performance)) 
   labs( x = "Players")
 ```
 
-## Conclusion 
+## Conclusion
 
 the results are a fairly even spread when looking at a 5 to 6 game average. The total difference between the top performing player and the lowest performing player is `r max(score_compare$performance) - min(score_compare$performance)`. A max differential in this format would be a number approaching 12 with one player winning all 6 games when they are expected to lose all 6 and another player losing all 6 games when they are expected to win all six games.

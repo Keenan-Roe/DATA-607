@@ -1,0 +1,17 @@
+---
+title: "Project 2 Tidy Data"
+format: html
+editor: visual
+---
+
+## Approach
+
+For this one I think I will stick with US census data. This will give me the ability to trim the data as well as tidy it. Just for the purposes of this project, I will focus on two age groups, or demographics and collect data based on that to compare trends and statistics between the two. The downside could be taking a couple iterations to find interesting relational data.
+
+However, food security employment, and depression rates will be top contenders
+
+<https://www2.census.gov/programs-surveys/demo/tables/hhp/2026/2607/food1.xlsx>
+
+<https://www2.census.gov/programs-surveys/demo/tables/hhp/2026/2607/employ2.xlsx>
+
+<https://www2.census.gov/programs-surveys/demo/tables/hhp/2026/2607/health2b.xlsx>

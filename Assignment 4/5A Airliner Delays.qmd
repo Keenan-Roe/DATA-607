@@ -31,7 +31,7 @@ write.csv(flights, "flight_delays.csv")
 
 ```
 
-## Tidying the data 
+## Tidying the data
 
 In order to flip the data into a taller style dataframe, we can use the pivot longer from the tidyr package. In much the same way that excel creates a pivot table, this will give use another dataframe that breaks this up the information into the Ariline, Status, City, and number of flights.
 
