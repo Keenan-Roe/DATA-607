@@ -1,0 +1,27 @@
+---
+title: "Project 2 Tidy Data"
+format: html
+editor: visual
+---
+
+## Introduction 
+
+```{r}
+#| title: load-data
+
+raw <- read_csv(
+  "employ2.csv",
+  col_names = FALSE,
+  col_types = cols(.default = col_character()),
+  locale = locale(encoding = "windows-1252"),
+  skip_empty_rows = FALSE
+)
+
+start <- which(raw$X1 == "Total")[1]
+end   <- which(str_detect(raw$X1, "^\\*\\*"))[1] - 1
+
+body <- raw[start:end, 1:10]
+names(body) <- c("label", "Total", "emp_total", "emp_Gov", "emp_private", "emp_nonprofit", "emp_self", "emp_not_reported", "unemp", "unemp_not_reported")
+
+
+```
