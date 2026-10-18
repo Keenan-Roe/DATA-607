@@ -1,0 +1,9 @@
+---
+title: "HTML & JSON approach"
+format: html
+editor: visual
+---
+
+## Approach
+
+This will be a very nice break from last weeks project. Chapter 25 may be wrong the incorrect chapter in the suggested reading, but I plan to use chapter 24 for webscraping practice in the reading. Some additional resources will be needed to create the JSON file. I plan to use textbooks to meet the requirements for this assignment.

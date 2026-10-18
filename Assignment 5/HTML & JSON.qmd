@@ -1,0 +1,80 @@
+---
+title: "HTML & JSON"
+format: html
+editor: visual
+---
+
+## Introduction 
+
+For this project, two files have been created holding the same information on R Programming textbooks. One is a JSON file and the other is an HTML file. Both have the same information and we will be comparing the two to see how each file type handles data.
+
+```{r}
+#| title: load-package
+#| message: False
+
+library(rvest)
+library(jsonlite)
+library(tidyverse)
+
+```
+
+## Creating the data frames 
+
+Using the rvest and jsonlite package we can load in each files as a tibble, and view them separately
+
+```{r}
+#| title: read-files
+
+html_df <- read_html("books.html") |>
+  html_element("table") |>
+  html_table() |>
+  as_tibble()
+
+html_df
+str(html_df)
+
+
+json_df <- fromJSON("books.json") |>
+  as_tibble()
+
+json_df
+str(json_df)
+```
+
+With the files loaded into our environment, we can both compare the two data frames and identify where any differences may be.
+
+```{r}
+#| title: compare 
+
+identical(html_df, json_df)
+
+all.equal(html_df, json_df)
+
+```
+
+Taking into account the information we got from the above comparison we can look at the lines that are dissimilar.
+
+```{r}
+#| title: the-problem
+
+print(html_df[[1,2]])
+print(json_df[[1,2]])
+
+```
+
+Now we know that the two tibble cells do not hold that data in the same way. HTML creates what looks like one string while the JSON file creates 3 different strings. The easiest way to get these two dataframes to match is to make the JSON data the same as the HTML file
+
+```{r}
+#| title: dataframe-manip
+
+json_df_flat <- json_df |>
+  mutate(authors = map_chr(authors, \(x) paste(x, collapse = ", ")))
+
+
+identical(html_df, json_df_flat)
+all.equal(html_df, json_df_flat)
+```
+
+## Conclusion 
+
+I decided to flatten the JSON file even though it is more information and uses the strengths of the tibble format because going forward it is better to treat multiple authors for one book as one discrete datapoint that can be expanded later if needed. The alternative would be to expand the tibble cell in the HTML file.
