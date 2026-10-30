@@ -1,0 +1,9 @@
+---
+title: "NYT API approach"
+format: html
+editor: visual
+---
+
+## Approach
+
+For this one I will focus on something more simple like the example given in the assignment explanation using the nyt books api to get top 5 popular books. However, if I'm able to get used to using api calls I will add some campaign finance statistics as well. The main problem looks to be actually calling an API in R rather than the data manipulation. Creating two API calls would give me the most out of this project.
