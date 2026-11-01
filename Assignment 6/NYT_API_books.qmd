@@ -1,0 +1,164 @@
+---
+title: "NYT Books API"
+format: html
+editor: visual
+---
+
+## Introduction
+
+We will be using the New York Times Books API to look at the current best seller lists and try to answer a simple question: which hardcover fiction books are at the top of the list right now, and do fiction best sellers have more staying power than nonfiction best sellers? To do this we will request both lists from the API, parse the JSON that comes back, and transform each one into a clean data frame that we can combine and compare.
+
+## The API
+
+The Books API has several endpoints for best seller lists, reviews, and list names. We will be using the **Lists** endpoint, which returns the books on a given best seller list along with details like rank, publisher, price, and how many weeks the book has been on the list. The endpoint looks like this:
+
+`https://api.nytimes.com/svc/books/v3/lists/current/{list-name}.json`
+
+The request uses the following parameters:
+
+- **list name** (part of the url): `hardcover-fiction` and `hardcover-nonfiction`. Using `current` in the url returns the most recent version of each list.
+- **api-key**: our personal NYT API key, which is never typed directly into the document.
+
+## Authentication
+
+An API key shouldn't be hard coded in a document that will be shared, so we will store ours in an environment variable called `NYT_API_KEY`. The easiest way to set this up is to run `usethis::edit_r_environ()`, add the line `NYT_API_KEY=your_key_here` to the file that opens, and then restart R. The code below reads the key and stops with a useful message if it cannot find one.
+
+```{r}
+#| title: get-key
+#| message: False
+
+library(tidyverse)
+library(httr2)
+library(jsonlite)
+library(gt)
+
+api_key <- Sys.getenv("NYT_API_KEY")
+
+if (api_key == "") {
+  stop("No API key found. Set NYT_API_KEY in your .Renviron file and restart R.")
+}
+```
+
+## Making the Request
+
+Since we need the same request for two different lists, we will write a function that takes a list name, builds the request, and returns the parsed books. The function uses `httr2` to build the request and `req_url_query` to attach the key so it is passed along as a parameter without ever being printed. The JSON is parsed with `simplifyVector = TRUE` so that the array of books comes back as a data frame instead of a list of lists.
+
+```{r}
+#| title: request-function
+
+get_list <- function(list_name) {
+  
+  resp <- request("https://api.nytimes.com/svc/books/v3/lists/current") |>
+    req_url_path_append(paste0(list_name, ".json")) |>
+    req_url_query(`api-key` = api_key) |>
+    req_perform()
+  
+  Sys.sleep(1)
+  
+  parsed <- resp |>
+    resp_body_json(simplifyVector = TRUE)
+  
+  books <- as_tibble(parsed$results$books) |>
+    mutate(list = list_name,
+           list_date = parsed$results$published_date)
+  
+  books
+}
+
+fiction_raw <- get_list("hardcover-fiction")
+nonfiction_raw <- get_list("hardcover-nonfiction")
+
+glimpse(fiction_raw)
+```
+
+## Cleaning the Data
+
+The raw result has a lot of columns we do not need and a few that are awkward to work with. The `buy_links` and `isbns` columns are nested, meaning each cell holds an entire data frame of links or ISBNs. Since we are not analyzing where to buy the books, we will drop them and keep the primary ISBN-13 as the identifier. We will also change the capitalization of the titles, convert the cost to a number or NA for 0, convert the rank_last_week to NA if 0 and add new_this week, and weeks on list is changed from 0 to 1 so we can start by counting the first week.
+
+Once both lists are cleaned the same way we can stack them into one data frame.
+
+```{r}
+#| title: clean-data
+
+clean_list <- function(df) {
+  df |>
+    select(list, rank, rank_last_week, weeks_on_list, title, author, publisher,
+           price, isbn13 = primary_isbn13, description) |>
+    mutate(
+      title = str_to_title(title),
+      price = na_if(as.numeric(price), 0),
+      new_this_week = rank_last_week == 0,
+      rank_last_week = na_if(rank_last_week, 0),
+      weeks_on_list = pmax(weeks_on_list, 1),
+      list = str_remove(list, "hardcover-") |> str_to_title()
+    )
+}
+
+best_sellers <- bind_rows(
+  clean_list(fiction_raw),
+  clean_list(nonfiction_raw)
+)
+
+best_sellers
+```
+
+## Analysis
+
+First we can answer the original question about the top five hardcover fiction books. These are the books at the top of the current list, along with how long they have been there.
+
+```{r}
+#| title: top-five
+
+best_sellers |>
+  filter(list == "Fiction") |>
+  arrange(rank) |>
+  slice_head(n = 5) |>
+  select(rank, title, author, publisher, weeks_on_list) |>
+  gt() |>
+  tab_header(title = "Top Five Hardcover Fiction Best Sellers")
+```
+
+Now we can compare the staying power of the two lists. Looking at the average and the median number of weeks on the list will show whether fiction or nonfiction best sellers tend to stick around longer. We will also look at how many books on each list are brand new this week.
+
+```{r}
+#| title: staying-power
+
+staying_power <- best_sellers |>
+  group_by(list) |>
+  summarise(
+    books = n(),
+    mean_weeks = mean(weeks_on_list),
+    median_weeks = median(weeks_on_list),
+    new_books = sum(new_this_week)
+  )
+
+staying_power |>
+  gt() |>
+  tab_header(title = "Staying Power by List") |>
+  fmt_number(columns = mean_weeks, decimals = 1)
+
+ggplot(best_sellers, aes(x = list, y = weeks_on_list, fill = list)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Fiction" = "steelblue", "Nonfiction" = "firebrick")) +
+  labs(x = "List", y = "Weeks on List") +
+  theme(legend.position = "none")
+```
+
+We can also see which publishers show up the most across both lists, since a few large publishers often control most of the best seller spots.
+
+```{r}
+#| title: publishers
+
+top_publishers <- best_sellers |>
+  count(publisher, sort = TRUE) |>
+  slice_head(n = 10)
+
+ggplot(top_publishers, aes(x = reorder(publisher, -n), y = n)) +
+  geom_col(fill = "steelblue") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Publisher", y = "Books on Lists")
+```
+
+## Conclusion
+
+The number one hardcover fiction book right now is `r best_sellers |> filter(list == "Fiction", rank == 1) |> pull(title)` by `r best_sellers |> filter(list == "Fiction", rank == 1) |> pull(author)`. Fiction books have spent an average of `r round(staying_power$mean_weeks[staying_power$list == "Fiction"], 1)` weeks on the list compared to `r round(staying_power$mean_weeks[staying_power$list == "Nonfiction"], 1)` weeks for nonfiction, so we can see which type of book tends to have more staying power. The most common publisher across both lists is `r top_publishers$publisher[1]` with `r top_publishers$n[1]` books. These numbers are only a snapshot of the lists as of `r unique(fiction_raw$list_date)`, so a more complete answer would repeat the request over several weeks using the `date` version of the endpoint and see whether the pattern holds.
