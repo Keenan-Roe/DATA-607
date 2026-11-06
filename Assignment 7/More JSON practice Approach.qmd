@@ -1,0 +1,9 @@
+---
+title: "More JSON practice Approach"
+format: html
+editor: visual
+---
+
+## Approach
+
+Thinking of questions after glancing at the APIs I think I could do a count of gender, country winners, and how often a prize is shared. Maybe a more robust question would be how old the laureates when they won and how that relates to the size of the team and the size of the prize. I suspect that both will go up, but it is just a feeling at this point.

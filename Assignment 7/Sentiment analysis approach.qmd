@@ -1,0 +1,9 @@
+---
+title: "Sentiment analysis approach"
+format: html
+editor: visual
+---
+
+## Approach 
+
+In this assignment I will most likely attempt to use the base of the code provided instead of reinventing the wheel. I am planning on using news articles about the midterm elections and it may be interesting to use the afinn lexicon to give a mood score to each news outlets reporting on the results. If this turns out to not be as interesting as I hope, I will move onto using nrc to aggregate sentiment within the news articles.
