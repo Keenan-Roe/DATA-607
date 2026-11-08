@@ -148,7 +148,7 @@ custom_stop_words <- bind_rows(tibble(word = c("miss"),
 custom_stop_words
 ```
 
-## Word clouds 
+## Word clouds
 
 ```{r}
 #| title: cloud
@@ -209,7 +209,7 @@ tidy_books %>%
   ungroup()
 ```
 
-## Sentiment Analysis with Midterm Articles 
+## Sentiment Analysis with Midterm Articles
 
 **Articles analysed**
 
@@ -241,7 +241,7 @@ jockers_rinker %>%
             negative_words = sum(value < 0))
 ```
 
-## Obtaining Articles as Text 
+## Obtaining Articles as Text
 
 Unfortunately, NPR does not allow web scraping so I have converted both articles to text and we will load them in like any other text file.
 

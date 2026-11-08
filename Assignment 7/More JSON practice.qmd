@@ -1,0 +1,231 @@
+---
+title: "More JSON Practice: Nobel Prize Data"
+format: html
+editor: visual
+---
+
+## Overview
+
+For this assignment we will use the public Nobel Prize API (version 2.1) to pull laureate data in JSON format, transform it into a tidy data frame in R, and answer four questions:
+
+1.  What is the gender breakdown of Nobel laureates?
+2.  Which countries have produced the most laureates?
+3.  How often is a prize shared?
+4.  How old were laureates when they won, and how does that relate to the size of the team and the size of the prize?
+
+## Obtaining the JSON data
+
+The API returns laureates in pages, so we loop through the pages using `offset` until a page comes back empty. The JSON is kept as nested lists (`simplifyVector = FALSE`) so we can control exactly how it gets flattened.
+
+```{r}
+#| title: loading-packages
+#| message: False
+
+library(jsonlite)
+library(tidyverse)
+```
+
+```{r}
+#| title: get-json
+
+base_url <- "https://api.nobelprize.org/2.1/laureates"
+
+# function to request one page of 100 laureates and return the list of laureates 
+get_page <- function(offset, limit = 100) {
+  url <- sprintf("%s?offset=%d&limit=%d", base_url, offset, limit)
+  fromJSON(url, simplifyVector = FALSE)$laureates
+}
+
+# keep requesting pages until there is nothing left 
+all_laureates <- list()
+offset <- 0
+repeat {
+  page <- get_page(offset)
+  if (length(page) == 0) break
+  all_laureates <- c(all_laureates, page)
+  offset <- offset + 100
+}
+
+length(all_laureates)
+```
+
+## Tidying the JSON
+
+A laureate can have more than one prize (Marie Curie won twice), so we build one row per laureate and prize. Organizations such as the Red Cross have no gender or birth date, so those fields will be `NA` for them.
+
+```{r}
+#| title: tidy-data
+
+get_value <- function(x, ...) {
+  v <- purrr::pluck(x, ..., .default = NA)
+  if (is.null(v) || length(v) == 0) NA else v
+}
+
+# convert the portion of a prize ("1", "1/2", "1/3", "1/4") into a number 
+portion_to_number <- function(x) {
+  map_dbl(x, function(s) {
+    if (is.na(s)) return(NA_real_)
+    p <- as.numeric(strsplit(s, "/")[[1]])
+    if (length(p) == 1) p else p[1] / p[2]
+  })
+}
+
+# one row for each prize each laureate received 
+nobel <- map_dfr(all_laureates, function(l) {
+  map_dfr(l$nobelPrizes, function(p) {
+    tibble(
+      id            = get_value(l, "id"),
+      name          = coalesce(get_value(l, "knownName", "en"),
+                               get_value(l, "orgName", "en")),
+      gender        = get_value(l, "gender"),
+      birth_date    = get_value(l, "birth", "date"),
+      birth_country = get_value(l, "birth", "place", "countryNow", "en"),
+      award_year    = as.integer(get_value(p, "awardYear")),
+      category      = get_value(p, "category", "en"),
+      portion       = get_value(p, "portion"),
+      prize_adj     = get_value(p, "prizeAmountAdjusted")
+    )
+  })
+}) %>%
+  mutate(
+    # birth dates are sometimes partial so only the year is used 
+    birth_year = suppressWarnings(as.integer(substr(birth_date, 1, 4))),
+    # approximate age at the time of the award 
+    age = award_year - birth_year,
+    # the laureate's own share of the (inflation adjusted) prize money 
+    share = portion_to_number(portion),
+    laureate_prize = prize_adj * share
+  ) %>%
+  # team size is the number of laureates who received the same prize 
+  group_by(award_year, category) %>%
+  mutate(team_size = n()) %>%
+  ungroup()
+
+glimpse(nobel)
+```
+
+## Question 1: Gender of laureates
+
+Organizations do not have a gender, so they are left out. Each person is counted once even if they won more than once.
+
+```{r}
+#| title: gender
+
+# overall count of unique people by gender 
+nobel %>%
+  filter(!is.na(gender)) %>%
+  distinct(id, gender) %>%
+  count(gender) %>%
+  mutate(percent = round(n / sum(n) * 100, 1))
+
+# count of prizes by category and gender 
+gender_category <- nobel %>%
+  filter(!is.na(gender)) %>%
+  count(category, gender) %>%
+  group_by(category) %>%
+  mutate(percent = round(n / sum(n) * 100, 1)) %>%
+  ungroup()
+
+gender_category
+
+ggplot(gender_category, aes(category, n, fill = gender)) +
+  geom_col(position = "dodge") +
+  labs(x = NULL, y = "Prizes awarded")
+```
+
+## Question 2: Countries of laureates
+
+Here we use the country where each laureate was born, using the modern name of the country (`countryNow`) so that places like the former USSR are not counted separately.
+
+```{r}
+#| title: countries
+
+# top 15 birth countries 
+top_countries <- nobel %>%
+  filter(!is.na(birth_country)) %>%
+  count(birth_country, sort = TRUE) %>%
+  slice_head(n = 15)
+
+top_countries
+
+ggplot(top_countries, aes(n, reorder(birth_country, n))) +
+  geom_col(fill = "steelblue") +
+  labs(x = "Prizes", y = NULL)
+```
+
+## Question 3: How often is a prize shared?
+
+A prize is one category in one year. It is considered shared when more than one laureate receives it.
+
+```{r}
+#| title: shared-prizes
+
+# one row for each prize with the number of laureates 
+prizes <- nobel %>%
+  distinct(award_year, category, team_size) %>%
+  mutate(shared = team_size > 1)
+
+# how many prizes were won by teams of each size 
+prizes %>%
+  count(team_size) %>%
+  mutate(percent = round(n / sum(n) * 100, 1))
+
+# overall proportion of prizes that are shared 
+mean(prizes$shared)
+
+# how the percent of shared prizes has changed by decade 
+shared_decade <- prizes %>%
+  group_by(decade = award_year %/% 10 * 10) %>%
+  summarise(percent_shared = mean(shared) * 100)
+
+ggplot(shared_decade, aes(decade, percent_shared)) +
+  geom_line() +
+  geom_point() +
+  labs(x = "Decade", y = "Percent of prizes shared")
+```
+
+## Question 4: Age, team size, and prize size
+
+Ages of 0 or less come from missing or partial birth dates and are removed. The prize size is each laureate's own share of the inflation adjusted prize money, since a bigger team means a smaller piece for each person.
+
+```{r}
+#| title: age
+
+laureate_age <- nobel %>%
+  filter(!is.na(age), age > 0)
+
+# overall summary of age at award 
+summary(laureate_age$age)
+
+# age by team size 
+laureate_age %>%
+  group_by(team_size) %>%
+  summarise(laureates = n(),
+            mean_age = round(mean(age), 1),
+            median_age = median(age))
+
+ggplot(laureate_age, aes(factor(team_size), age)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(x = "Laureates sharing the prize", y = "Age at award")
+
+# age against the size of the laureate's own prize 
+laureate_age %>%
+  filter(!is.na(laureate_prize)) %>%
+  ggplot(aes(age, laureate_prize)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "lm") +
+  labs(x = "Age at award", y = "Laureate's share of prize (inflation adjusted)")
+
+# correlation of age with team size and with prize size 
+laureate_age %>%
+  summarise(age_vs_team_size = cor(age, team_size),
+            age_vs_prize = cor(age, laureate_prize, use = "complete.obs"))
+```
+
+## Final Analysis
+
+The gender breakdown should show that men make up the large majority of laureates, with women having the most representation in the Peace and Literature categories. The country counts should be led by the United States, followed by European countries such as the United Kingdom, Germany, and France. Counting by birth country also hides the fact that many laureates did their prize winning work somewhere else.
+
+Sharing a prize is the norm rather than the exception in recent decades, and the percent of shared prizes has generally risen over time, especially in the science categories where discoveries often come from several researchers. This matters for the last question, because the money for a prize is fixed and each additional laureate means a smaller portion for everyone.
+
+Finally, laureates tend to be in their late 50s or 60s when they win, which makes sense because many prizes recognize work that took decades to be accepted. Age should only be weakly related to team size, and the size of an individual prize depends much more on the year and on the number of people sharing it than on how old the winner is. One shortcoming is that age here is only approximate since it is the award year minus the birth year, and the inflation adjusted prize amount mostly reflects when the prize was won rather than who won it.
