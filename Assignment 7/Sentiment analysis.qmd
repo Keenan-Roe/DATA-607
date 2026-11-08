@@ -1,0 +1,449 @@
+---
+title: "Sentiment Analysis"
+format: html
+editor: visual
+bibliography: https://raw.githubusercontent.com/Keenan-Roe/DATA-607/refs/heads/main/Assignment%207/reference.bib
+---
+
+## Reproducing the text
+
+To start, we will be reproducing the full code from chapter 2 of *Text Mining with R: A Tidy Approach* [@silge2017text]
+
+```{r}
+#| title: loading-sentiments
+#| message: False
+
+#all packages loaded that will be used through the upcoming chapter 
+library(tidytext)
+library(wordcloud)
+library(reshape2)
+library(janeaustenr)
+library(tidyverse)
+
+get_sentiments("afinn")
+get_sentiments("bing")
+get_sentiments("nrc")
+```
+
+## Sentiment analysis with inner join
+
+```{r}
+#| title: inner-join
+
+#library(janeaustenr)
+#library(tidyverse)
+
+#create datset of words in Jane Austen books 
+tidy_books <- austen_books() %>%
+  #group the rows by book 
+  group_by(book) %>%
+  #create a column for the line number using the rows and count chapters in the format "chapter number" 
+  mutate(
+    linenumber = row_number(),
+    chapter = cumsum(str_detect(text, 
+                                regex("^chapter [\\divxlc]", 
+                                      ignore_case = TRUE)))) %>%
+  #ungroup to create the tibble
+  ungroup() %>%
+  #split into one word per row
+  unnest_tokens(word, text)
+
+#create dataset using joy sentiments in nrc lexicon 
+nrc_joy <- get_sentiments("nrc") %>% 
+  filter(sentiment == "joy")
+
+#filter to the book emma and only count the joy sentiment words 
+tidy_books %>%
+  filter(book == "Emma") %>%
+  inner_join(nrc_joy) %>%
+  count(word, sort = TRUE)
+```
+
+```{r}
+#| title: plots
+
+# using bing sentiments look at 80 line chunks and count the sentiments in each chunk. add columns with sentiment names using values of count n and a column for overall sentiment 
+jane_austen_sentiment <- tidy_books %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(book, index = linenumber %/% 80, sentiment) %>%
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) %>% 
+  mutate(sentiment = positive - negative)
+
+#sentiment plots for each book
+ggplot(jane_austen_sentiment, aes(index, sentiment, fill = book)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~book, ncol = 2, scales = "free_x")
+```
+
+```{r}
+#| title: pride-and-prejudice
+
+pride_prejudice <- tidy_books %>% 
+  filter(book == "Pride & Prejudice")
+# looking at pride and prejudice compare each sentiment rating 
+afinn <- pride_prejudice %>% 
+  inner_join(get_sentiments("afinn")) %>% 
+  group_by(index = linenumber %/% 80) %>% 
+  summarise(sentiment = sum(value)) %>% 
+  mutate(method = "AFINN")
+
+bing_and_nrc <- bind_rows(
+  pride_prejudice %>% 
+    inner_join(get_sentiments("bing")) %>%
+    mutate(method = "Bing et al."),
+  pride_prejudice %>% 
+    inner_join(get_sentiments("nrc") %>% 
+                 filter(sentiment %in% c("positive", 
+                                         "negative"))
+    ) %>%
+    mutate(method = "NRC")) %>%
+  count(method, index = linenumber %/% 80, sentiment) %>%
+  pivot_wider(names_from = sentiment,
+              values_from = n,
+              values_fill = 0) %>% 
+  mutate(sentiment = positive - negative)
+
+#combine the data adnplot it using ggplot 
+bind_rows(afinn, 
+          bing_and_nrc) %>%
+  ggplot(aes(index, sentiment, fill = method)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~method, ncol = 1, scales = "free_y")
+
+get_sentiments("nrc") %>% 
+  filter(sentiment %in% c("positive", "negative")) %>% 
+  count(sentiment)
+
+get_sentiments("bing") %>% 
+  count(sentiment)
+```
+
+## Most common negative and positive words
+
+```{r}
+#| title: pos-neg
+
+#looking at each word, plot the number of times each positive and negative is ued
+bing_word_counts <- tidy_books %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  ungroup()
+
+bing_word_counts %>%
+  group_by(sentiment) %>%
+  slice_max(n, n = 10) %>% 
+  ungroup() %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales = "free_y") +
+  labs(x = "Contribution to sentiment",
+       y = NULL)
+
+#add a custom sentiment for miss so it is not considered negative since it is used to describe an unmarried woman
+custom_stop_words <- bind_rows(tibble(word = c("miss"),  
+                                      lexicon = c("custom")), 
+                               stop_words)
+
+custom_stop_words
+```
+
+## Word clouds 
+
+```{r}
+#| title: cloud
+
+#library(wordcloud)
+#word cloud using word frequency 
+tidy_books %>%
+  anti_join(stop_words) %>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 100))
+
+#library(reshape2)
+#reshaped wordcloud to show positive on top and negative on bottom 
+tidy_books %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  acast(word ~ sentiment, value.var = "n", fill = 0) %>%
+  comparison.cloud(colors = c("gray20", "gray80"),
+                   max.words = 100)
+```
+
+```{r}
+#| title: line-sentiment
+
+# create a dataframe of each sentence 
+p_and_p_sentences <- tibble(text = prideprejudice) %>% 
+  unnest_tokens(sentence, text, token = "sentences")
+
+p_and_p_sentences$sentence[2]
+
+# there are issues looking by line so we will look at chapters 
+austen_chapters <- austen_books() %>%
+  group_by(book) %>%
+  unnest_tokens(chapter, text, token = "regex", 
+                pattern = "Chapter|CHAPTER [\\dIVXLC]") %>%
+  ungroup()
+
+austen_chapters %>% 
+  group_by(book) %>% 
+  summarise(chapters = n())
+
+#for each book what has the highest proportion of negative words using bing lexicon
+bingnegative <- get_sentiments("bing") %>% 
+  filter(sentiment == "negative")
+
+wordcounts <- tidy_books %>%
+  group_by(book, chapter) %>%
+  summarize(words = n())
+
+tidy_books %>%
+  semi_join(bingnegative) %>%
+  group_by(book, chapter) %>%
+  summarize(negativewords = n()) %>%
+  left_join(wordcounts, by = c("book", "chapter")) %>%
+  mutate(ratio = negativewords/words) %>%
+  filter(chapter != 0) %>%
+  slice_max(ratio, n = 1) %>% 
+  ungroup()
+```
+
+## Sentiment Analysis with Midterm Articles 
+
+**Articles analysed**
+
+1.  NPR, "World reacts to midterm elections" (<https://www.npr.org/2026/11/04/nx-s1-6028664/world-reacts-midterm-elections>) [@bartlett2026npr]
+2.  Fox News, "DeSantis calls GOP midterm losses 'extinction-level event' and explains why Florida survived" (<https://www.foxnews.com/politics/desantis-calls-gop-midterm-losses-extinction-level-event-explains-why-florida-survived>) [@creitz2026fox]
+
+For additional practice we will be using a different lexicon for this analysis. We will use the sentiment created from the sentiment lexicon of Mathew Jockers and Tyler Rinker.
+
+```{r}
+#| title: additional-packages 
+#| message: False
+
+
+library(rvest)
+library(lexicon)
+
+jockers_rinker <- hash_sentiment_jockers_rinker %>%
+  as_tibble() %>%
+  rename(word = x, value = y)
+
+jockers_rinker
+
+#size and score range 
+jockers_rinker %>%
+  summarise(words = n(),
+            min_score = min(value),
+            max_score = max(value),
+            positive_words = sum(value > 0),
+            negative_words = sum(value < 0))
+```
+
+## Obtaining Articles as Text 
+
+Unfortunately, NPR does not allow web scraping so I have converted both articles to text and we will load them in like any other text file.
+
+```{r}
+#| title: test
+
+fox_url <- "https://www.foxnews.com/politics/desantis-calls-gop-midterm-losses-extinction-level-event-explains-why-florida-survived"
+
+# paragraphs matching these patterns are page furniture, not article text.
+# adjust this list after inspecting the scraped output
+drop_patterns <- "^(NEWYou|CLICK HERE|SIGN UP|Fox News Digital reached out|Born and raised)|Getty Images|\\(Reuters\\)"
+
+get_fox_text <- function(url) {
+  read_html(url) %>%
+    html_elements(".article-body p") %>%   # paragraphs inside the article body
+    html_text2() %>%
+    str_squish() %>%
+    discard(~ .x == "" || str_detect(.x, drop_patterns))
+}
+
+fox_text <- tryCatch(get_fox_text(fox_url),
+                     error = function(e) {
+                       message("Fox News scrape failed: ", conditionMessage(e))
+                       NULL
+                     })
+
+npr_text <- readLines("https://raw.githubusercontent.com/Keenan-Roe/DATA-607/refs/heads/main/Assignment%207/npr-world-reacts-midterm-el.txt")%>% 
+  str_squish() %>% 
+  discard(~ .x == "")
+
+# strip down the article 
+npr_text <- read_lines("npr_text.txt") %>%
+  { .[str_which(., "^One color dominates"):str_which(., "contributed reporting")] }
+
+npr_text <- npr_text %>%
+  { .[-unlist(lapply(str_which(., "^\\[\\]\\("), function(i) i:(i + 2)))] } %>%
+  str_subset("hide caption|toggle caption|/AP$|^Twitter Embed|^— .*@|pic\\.twitter|^I feel the world has an opportunity|^Reacting to the Democrats", negate = TRUE)
+
+# combine into one tibble: one row per paragraph
+articles <- bind_rows(
+  if (!is.null(npr_text)) tibble(article = "NPR", text = npr_text),
+  if (!is.null(fox_text)) tibble(article = "Fox News", text = fox_text)
+)
+
+stopifnot(nrow(articles) > 0)
+
+articles %>%
+  group_by(article) %>%
+  summarise(paragraphs = n(),
+            characters = sum(nchar(text)))
+```
+
+## Breaking down the text
+
+As in the original file, the text is split to one word per row. Austen's books were tracked by line number; the articles are short, so each word's position within its article (`wordnumber`) is used instead.
+
+```{r}
+#| title: tokens-text-join
+
+tidy_articles <- articles %>%
+  unnest_tokens(word, text) %>%
+  group_by(article) %>%
+  mutate(wordnumber = row_number()) %>%
+  ungroup()
+
+tidy_articles %>% count(article, name = "total_words")
+
+custom_exclude <- c("vice")
+
+article_sentiment <- tidy_articles %>%
+  inner_join(jockers_rinker, by = "word") %>%
+  filter(!word %in% custom_exclude)
+
+# how much of each article does the lexicon actually cover?
+tidy_articles %>%
+  count(article, name = "total_words") %>%
+  left_join(count(article_sentiment, article, name = "matched_words"),
+            by = "article") %>%
+  mutate(percent_matched = round(matched_words / total_words * 100, 1))
+```
+
+## Sentiment With Each Article
+
+The original file summed scores over 80-line chunks. These articles are only a few hundred to a thousand words long, so smaller 50-word chunks are used.
+
+```{r}
+#| title: article-sentiment
+
+chunk_sentiment <- article_sentiment %>%
+  group_by(article, index = wordnumber %/% 50) %>%
+  summarise(sentiment = sum(value), .groups = "drop")
+
+ggplot(chunk_sentiment, aes(index, sentiment, fill = article)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~article, ncol = 1, scales = "free_x") +
+  labs(x = "50-word chunk (position in article)",
+       y = "Net sentiment (sum of word scores)")
+
+```
+
+## Overall comparison
+
+Total scores depend on article length, so the table also reports sentiment per 100 words and the average score of the words that matched.
+
+```{r}
+#| title: overall
+
+overall <- article_sentiment %>%
+  group_by(article) %>%
+  summarise(matched_words = n(),
+            positive_words = sum(value > 0),
+            negative_words = sum(value < 0),
+            net_sentiment = sum(value),
+            avg_matched_score = mean(value),
+            .groups = "drop") %>%
+  left_join(count(tidy_articles, article, name = "total_words"), by = "article") %>%
+  mutate(net_per_100_words = net_sentiment / total_words * 100)
+
+overall
+
+overall %>%
+  ggplot(aes(article, net_per_100_words, fill = article)) +
+  geom_col(show.legend = FALSE) +
+  geom_hline(yintercept = 0) +
+  labs(x = NULL, y = "Net sentiment per 100 words")
+
+```
+
+## Most Common Negative and Positive Words
+
+```{r}
+#| title: pos-neg
+
+word_counts <- article_sentiment %>%
+  mutate(direction = if_else(value > 0, "positive", "negative")) %>%
+  count(article, word, direction, sort = TRUE)
+
+word_counts %>%
+  group_by(article, direction) %>%
+  slice_max(n, n = 8, with_ties = FALSE) %>%
+  ungroup() %>%
+  mutate(word = reorder_within(word, n, list(article, direction))) %>%
+  ggplot(aes(n, word, fill = direction)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(article ~ direction, scales = "free_y") +
+  scale_y_reordered() +
+  labs(x = "Contribution to sentiment (word count)", y = NULL)
+
+```
+
+## Word Cloud
+
+```{r}
+#| title: word-clouds
+
+article_sentiment %>%
+  mutate(direction = if_else(value > 0, "positive", "negative")) %>%
+  count(word, direction, sort = TRUE) %>%
+  acast(word ~ direction, value.var = "n", fill = 0) %>%
+  comparison.cloud(colors = c("gray20", "gray60"),
+                   max.words = 50)
+
+```
+
+## Sentence sentiment
+
+```{r}
+#| title: sentences
+
+#| title: sentence-sentiment
+
+sentence_scores <- articles %>%
+  unnest_tokens(sentence, text, token = "sentences") %>%
+  group_by(article) %>%
+  mutate(sentence_id = row_number()) %>%
+  ungroup() %>%
+  unnest_tokens(word, sentence, drop = FALSE) %>%
+  filter(!word %in% custom_exclude) %>%
+  inner_join(jockers_rinker, by = "word") %>%
+  group_by(article, sentence_id, sentence) %>%
+  summarise(score = sum(value), .groups = "drop")
+
+# the single most negative and most positive sentence in each article
+bind_rows(
+  sentence_scores %>% group_by(article) %>% slice_min(score, n = 1, with_ties = FALSE),
+  sentence_scores %>% group_by(article) %>% slice_max(score, n = 1, with_ties = FALSE)
+) %>%
+  ungroup() %>%
+  mutate(preview = str_trunc(sentence, 100)) %>%
+  select(article, sentence_id, score, preview) %>%
+  arrange(article, score)
+
+```
+
+## Interpretation
+
+When analyzing the data in something like news articles about a political election, it is important to note that we use normatively loaded language to describe objective events. For instance, a loss is considered negative but is also how we objectively describe the election results. Another interesting wrinkle when looking at this data is that trump is considered a negative term and will change the overall sentiment of each article as well.
+
+With this in mind, we see that Fox news focused on the loss and kept the article short letting DeSantis's quote be the bulk of the article. In addition, this article was on of the the most direct articles about this year's midterms on Fox News the day after the election. the article was very negative, but it does not come through when looking at the sentiment score due to some standard nomencalture used when speaking on elections such as results, big, and like.
+
+Moving over to the NPR article, it was much more robust with much of the article focusing on Trump's less popular outcomes among all voting demographics. The negatives that the NPR article focused on were foreign affairs and war. However, the article clearly focused on the results, support, and leaders.
+
+When comparing the net sentiment it would seem as though the Fox News side was using more positive language in general to describe the results while the lowest score comes from Rob Desantis stating "republicans have been nearly wiped out" [@creitz2026fox] and the NPR lowest rated sentence being a comment on the relationship between the US and South Africa being at an "all time low" [@bartlett2026npr]
+
+Using sentiment lexicons may have some shortcoming when analyzing situations with extreme gravity. The Fox News article quote DeSantis stating that the midterm losses were "Extinction Level Event" [@creitz2026fox] paints a much more negative picture with that one phrase than the entirety of the rest of the article. However, it is very interesting that the net scores were ultimately so close together and could show a pattern of communication styles that news networks use when reporting on any particular matter, positive or negative.
